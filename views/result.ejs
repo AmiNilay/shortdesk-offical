@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Link Created!</title>
+
+  <!-- ✅ Favicon & PWA Icons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#81c784">
+
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="light">
+  <main class="glass result-page">
+    <h1 class="brand">✨ Link Created!</h1>
+    <p class="subtitle">Your link is ready — short, smart, and shareable!</p>
+
+    <div class="result-card">
+      <div class="field-group">
+        <label for="shortUrl">Short URL</label>
+        <div class="input-row">
+          <input id="shortUrl" type="text" value="<%= shortUrl %>" readonly />
+          <button class="btn-small" onclick="copyLink()">Copy</button>
+        </div>
+      </div>
+
+      <div class="link-display">
+        <a href="<%= shortUrl %>" target="_blank"><%= shortUrl %></a>
+      </div>
+
+      <p class="original-url">
+        <strong>Original:</strong>
+        <a href="<%= originalUrl %>" target="_blank"><%= originalUrl %></a>
+      </p>
+
+      <div class="qr-section">
+        <img src="<%= qrDataUrl %>" alt="QR Code" />
+        <a class="btn-download" href="<%= qrDataUrl %>" download="qr-<%= shortId %>.png">Download QR</a>
+      </div>
+
+      <div class="button-group">
+        <a class="btn-main" href="/">Create Another</a>
+        <a class="btn-outline" href="<%= shortUrl %>">Open Link</a>
+      </div>
+    </div>
+
+    <footer>Made with ❤️ by Nilay</footer>
+  </main>
+
+  <script>
+    async function copyLink() {
+      const el = document.getElementById('shortUrl');
+      el.select();
+      el.setSelectionRange(0, 99999);
+      await navigator.clipboard.writeText(el.value);
+      alert("✅ Short link copied!");
+    }
+  </script>
+</body>
+</html>

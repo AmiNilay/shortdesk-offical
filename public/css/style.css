@@ -1,0 +1,250 @@
+/* ==========================================
+   🌈 Global Light Glass UI — Nilay Short
+   ========================================== */
+:root {
+  --accent1: #5c6bc0;
+  --accent2: #81c784;
+  --text-dark: #1b1b1b;
+  --bg1: #f8e8ff;
+  --bg2: #e0f7fa;
+  --bg3: #fffde7;
+  --blur: 20px;
+  --radius: 18px;
+}
+
+/* ---------- Base ---------- */
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+  background-size: 400% 400%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-dark);
+  animation: gradientShift 18s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ---------- Glass Container ---------- */
+.glass {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(var(--blur));
+  border-radius: var(--radius);
+  padding: 40px 50px;
+  width: min(90%, 520px);
+  text-align: center;
+}
+
+/* ---------- Header ---------- */
+.brand {
+  background: linear-gradient(90deg, var(--accent1), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  font-size: 2.2rem;
+  margin-bottom: 6px;
+}
+
+.tagline, .subtitle {
+  color: #555;
+  font-size: 1rem;
+  margin-bottom: 25px;
+}
+
+/* ---------- Buttons ---------- */
+.btn-main {
+  background: linear-gradient(135deg, var(--accent1), var(--accent2));
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: 0.25s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-main:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(92, 107, 192, 0.4);
+}
+
+.btn-outline {
+  border: 1px solid var(--accent1);
+  color: var(--accent1);
+  padding: 12px 22px;
+  border-radius: 14px;
+  text-decoration: none;
+  font-weight: 600;
+  background: transparent;
+  transition: 0.25s;
+}
+
+.btn-outline:hover {
+  background: var(--accent1);
+  color: white;
+}
+
+.btn-small {
+  border: 1px solid var(--accent1);
+  color: var(--accent1);
+  background: white;
+  border-radius: 12px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.25s;
+}
+
+.btn-small:hover {
+  background: var(--accent1);
+  color: white;
+}
+
+.btn-download {
+  display: inline-block;
+  margin-top: 10px;
+  border: 1px solid var(--accent2);
+  color: #2e7d32;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: 0.25s;
+}
+
+.btn-download:hover {
+  background: var(--accent2);
+  color: white;
+}
+
+/* ---------- Input Fields ---------- */
+input[type="url"],
+input[type="text"],
+input[readonly] {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  outline: none;
+  transition: 0.25s;
+}
+
+input:focus {
+  border-color: var(--accent1);
+  box-shadow: 0 0 8px rgba(92, 107, 192, 0.3);
+}
+
+/* ---------- Home Page ---------- */
+.home-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.alert {
+  background: rgba(255, 0, 0, 0.1);
+  color: #b00020;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* ---------- Result Page ---------- */
+.result-page .result-card {
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 18px;
+  padding: 25px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.field-group {
+  margin-bottom: 16px;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.link-display a {
+  color: #2b6cb0;
+  word-break: break-all;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.original-url {
+  font-size: 0.9rem;
+  margin: 20px 0;
+  word-break: break-all;
+}
+
+.original-url a {
+  color: #00796b;
+  text-decoration: underline;
+}
+
+/* ---------- QR Section ---------- */
+.qr-section {
+  margin-top: 20px;
+}
+
+.qr-section img {
+  width: 160px;
+  height: 160px;
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* ---------- Layout Elements ---------- */
+.button-group {
+  margin-top: 25px;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+footer {
+  margin-top: 25px;
+  font-size: 0.85rem;
+  color: #555;
+}

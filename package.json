@@ -1,0 +1,22 @@
+{
+  "name": "my-link-shortener",
+  "version": "1.0.0",
+  "description": "A personal URL shortener with QR generation built by Nilay",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "Nilay",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.3",
+    "ejs": "^3.1.9",
+    "dotenv": "^16.3.1",
+    "nanoid": "^5.0.2",
+    "qrcode": "^1.5.3",
+    "morgan": "^1.10.0",
+    "body-parser": "^1.20.2"
+  }
+}
