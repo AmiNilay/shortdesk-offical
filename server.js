@@ -1,4 +1,4 @@
-// --- Load environment variables safely
+// --- Load environment variables
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const express = require('express');
@@ -8,18 +8,20 @@ const { customAlphabet } = require('nanoid');
 const bodyParser = require('body-parser');
 const QRCode = require('qrcode');
 const path = require('path');
+const favicon = require('serve-favicon');
 
 const app = express();
 
-// --- App settings
+// --- Express App Setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.set('trust proxy', true);
 
-// --- Create nanoid generator
+// --- NanoID Generator
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-', 8);
 
 // --- Environment Variables
@@ -27,10 +29,9 @@ const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || null;
 
-console.log('🧠 Loaded MONGO_URI =', MONGO_URI ? '✅ Found' : '❌ Undefined');
-
+// --- Check MongoDB Config
 if (!MONGO_URI) {
-  console.error('❌ ERROR: MONGO_URI is not defined in .env');
+  console.error('❌ ERROR: MONGO_URI is not defined. Please add it in .env or Vercel Environment Variables.');
   process.exit(1);
 }
 
@@ -42,7 +43,7 @@ mongoose.connect(MONGO_URI, { dbName: 'shortener' })
     process.exit(1);
   });
 
-// --- Schema & Model
+// --- Define URL Schema
 const urlSchema = new mongoose.Schema({
   originalUrl: { type: String, required: true, trim: true },
   shortId: { type: String, required: true, unique: true, index: true },
@@ -72,12 +73,12 @@ const CUSTOM_ALIAS_REGEX = /^[a-zA-Z0-9_-]{3,30}$/;
 
 // --- Routes
 
-// Home page
+// Home Page
 app.get('/', (req, res) => {
   res.render('index', { error: null });
 });
 
-// Create short link
+// Create Short Link
 app.post('/shorten', async (req, res) => {
   try {
     const { originalUrl, customAlias } = req.body;
@@ -125,7 +126,7 @@ app.post('/shorten', async (req, res) => {
   }
 });
 
-// --- Redirect + Count Clicks
+// Redirect to Original URL
 app.get('/:shortId', async (req, res) => {
   try {
     const { shortId } = req.params;
@@ -143,10 +144,13 @@ app.get('/:shortId', async (req, res) => {
   }
 });
 
-// --- Start Server
-const HOST = process.env.HOST || '0.0.0.0';
+// --- Export app for Vercel
+module.exports = app;
 
-app.listen(PORT, HOST, () => {
-  console.log(`🚀 Server running on ${process.env.BASE_URL || `http://${HOST}:${PORT}`}`);
-});
-
+// --- Local Server (for Development)
+if (require.main === module) {
+  const HOST = process.env.HOST || '0.0.0.0';
+  app.listen(PORT, HOST, () => {
+    console.log(`🚀 Server running on ${process.env.BASE_URL || `http://${HOST}:${PORT}`}`);
+  });
+}
