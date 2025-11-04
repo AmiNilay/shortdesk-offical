@@ -4,7 +4,10 @@
 
 ---
 
-![ShortDesk Preview](https://ibb.co/V0hX2xzL)
+<p align="center">
+  <img src="assets/shortdesk-banner.png" alt="ShortDesk Banner" width="100%" />
+</p>
+
 
 <p align="center">
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-18.x-green?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js"></a>
