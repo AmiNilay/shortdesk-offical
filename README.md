@@ -19,7 +19,7 @@
 
 ---
 
-## 🚀 Live Demo  
+## 🚀 Live  
 🔗 **Visit Now:** [https://shortdesk-offical.vercel.app](https://shortdesk-offical.vercel.app)
 
 ---
