@@ -19,27 +19,27 @@
   <div class="noise-overlay"></div>
 
   <!-- NAV -->
-<nav class="landing-nav" id="mainNav">
-  <div class="landing-nav-inner">
-    <a href="/" class="nav-logo">
-      <img src="/assets/dm.png" alt="ShortDesk" class="nav-logo-img logo-dark">
-      <img src="/assets/lm.png" alt="ShortDesk" class="nav-logo-img logo-light">
-      <span class="nav-logo-text">ShortDesk</span>
-    </a>
-    <div class="nav-center">
-      <a href="/">Home</a>
-      <a href="/#features">Features</a>
-      <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
-      <a href="/dashboard">Dashboard</a>
+  <nav class="landing-nav scrolled">
+    <div class="landing-nav-inner">
+      <a href="/" class="nav-logo">
+        <img src="/assets/dm.png" alt="ShortDesk" class="nav-logo-img logo-dark">
+        <img src="/assets/lm.png" alt="ShortDesk" class="nav-logo-img logo-light">
+        <span class="nav-logo-text">ShortDesk</span>
+      </a>
+      <div class="nav-center">
+        <a href="/">Home</a>
+        <a href="/#features">Features</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+        <a href="/dashboard">Dashboard</a>
+      </div>
+      <div class="nav-right">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span id="themeIcon">&#9789;</span>
+        </button>
+        <a href="/" class="btn btn-primary btn-sm nav-cta">New Link</a>
+      </div>
     </div>
-    <div class="nav-right">
-      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-        <span id="themeIcon">&#9789;</span>
-      </button>
-      <a href="/" class="btn btn-primary btn-sm nav-cta">New Link</a>
-    </div>
-  </div>
-</nav>
+  </nav>
 
   <!-- PAGE HEADER -->
   <section class="page-header">
@@ -65,9 +65,7 @@
 
       <div class="legal-card reveal-scroll" style="--reveal-delay:0.05s">
         <h2>2. Description of Service</h2>
-        <p>
-          ShortDesk provides URL shortening services including:
-        </p>
+        <p>ShortDesk provides URL shortening services including:</p>
         <ul>
           <li>Short URL creation with optional custom aliases</li>
           <li>Click analytics and tracking</li>
@@ -125,7 +123,7 @@
       </div>
 
       <div class="legal-card reveal-scroll" style="--reveal-delay:0.25s">
-        <h2>6. Rate Limits & Abuse Prevention</h2>
+        <h2>6. Rate Limits and Abuse Prevention</h2>
         <p>
           We implement rate limiting to prevent abuse. Excessive use may result in
           temporary or permanent restriction of access. Automated or bot-driven
@@ -157,9 +155,7 @@
 
       <div class="legal-card reveal-scroll" style="--reveal-delay:0.4s">
         <h2>9. Limitation of Liability</h2>
-        <p>
-          In no event shall ShortDesk, its maintainers, or contributors be liable for:
-        </p>
+        <p>In no event shall ShortDesk, its maintainers, or contributors be liable for:</p>
         <ul>
           <li>Any indirect, incidental, or consequential damages</li>
           <li>Loss of data, revenue, or profits</li>
@@ -210,7 +206,8 @@
     <div class="footer-inner">
       <div class="footer-col footer-brand-col">
         <div class="footer-logo">
-          <span class="nav-logo-mark" style="width:28px;height:28px;font-size:0.85rem">S</span>
+          <img src="/assets/dm.png" alt="ShortDesk" class="footer-logo-img logo-dark">
+          <img src="/assets/lm.png" alt="ShortDesk" class="footer-logo-img logo-light">
           <span class="footer-brand">ShortDesk</span>
         </div>
         <p class="footer-tagline">Smart, trackable, password-protected short links. Open source and free forever.</p>
@@ -241,6 +238,7 @@
     </div>
   </footer>
 
+  <!-- SCRIPTS -->
   <script>
     (function() {
       var saved = localStorage.getItem('shortdesk-theme');
@@ -256,7 +254,8 @@
     }
     function updateIcon() {
       var t = document.documentElement.getAttribute('data-theme');
-      document.getElementById('themeIcon').innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
+      var el = document.getElementById('themeIcon');
+      if (el) el.innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
     }
   </script>
   <script>
