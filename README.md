@@ -1,8 +1,3 @@
-Here is the complete updated `README.md`:
-
----
-
-```markdown
 # ShortDesk — Smart, Trackable URL Shortener
 
 > A sleek, open-source URL shortener with password protection, analytics, QR codes, webhooks, and dark/light mode. Built with Node.js, Express, MongoDB Atlas, and EJS. Deployed on Vercel.
