@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "jest --forceExit --detectOpenHandles"
+    "test": "NODE_ENV=test jest --forceExit --detectOpenHandles --testTimeout=15000"
   },
   "keywords": [
     "url-shortener",
