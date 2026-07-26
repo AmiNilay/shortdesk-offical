@@ -28,7 +28,7 @@
       </a>
       <div class="nav-center">
         <a href="/" class="active">Home</a>
-        <a href="#features">Features</a>
+        <a href="#features" class="nav-anchor">Features</a>
         <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
         <a href="/dashboard">Dashboard</a>
       </div>
@@ -36,7 +36,7 @@
         <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
           <span id="themeIcon">&#9789;</span>
         </button>
-        <a href="#shorten" class="btn btn-primary btn-sm nav-cta">Get Started</a>
+        <a href="#shorten" class="btn btn-primary btn-sm nav-cta nav-anchor">Get Started</a>
       </div>
     </div>
   </nav>
@@ -68,7 +68,7 @@
         </p>
 
         <div class="hero-actions reveal" style="animation-delay:0.3s">
-          <a href="#shorten" class="btn btn-primary btn-lg hero-cta-main">
+          <a href="#shorten" class="btn btn-primary btn-lg hero-cta-main nav-anchor">
             Get Started Free
             <span class="btn-arrow">&rarr;</span>
           </a>
@@ -233,32 +233,32 @@
   </section>
 
   <!-- ============ STATS ============ -->
-  <section class="stats-section">
+  <section class="stats-section" id="stats">
     <div class="stats-inner">
-      <div class="stat-item reveal-scroll">
+      <div class="stat-item reveal-scroll" style="--reveal-delay:0s">
         <div class="stat-number">
-          <span class="counter" data-target="100" data-suffix="ms" data-prefix="<">&lt;</span><span class="counter" data-target="100" data-suffix="ms"></span>
+          <span class="counter-up" data-target="100" data-prefix="&lt;" data-suffix="ms">0</span>
         </div>
         <div class="stat-desc">Average redirect with Redis</div>
       </div>
       <div class="stat-divider"></div>
       <div class="stat-item reveal-scroll" style="--reveal-delay:0.1s">
         <div class="stat-number">
-          <span class="counter" data-target="50" data-suffix="+"></span>
+          <span class="counter-up" data-target="50" data-prefix="" data-suffix="+">0</span>
         </div>
         <div class="stat-desc">Events batch-inserted per flush</div>
       </div>
       <div class="stat-divider"></div>
       <div class="stat-item reveal-scroll" style="--reveal-delay:0.2s">
         <div class="stat-number">
-          <span class="counter-text">62<sup>n</sup></span>
+          <span class="counter-up" data-target="62" data-prefix="" data-suffix="" data-sup="n">0</span>
         </div>
         <div class="stat-desc">Collision-safe base62 codes</div>
       </div>
       <div class="stat-divider"></div>
       <div class="stat-item reveal-scroll" style="--reveal-delay:0.3s">
         <div class="stat-number">
-          <span class="counter" data-target="0" data-prefix="$"></span>
+          <span class="counter-down" data-from="99" data-prefix="$" data-suffix="">0</span>
         </div>
         <div class="stat-desc">Completely free, open source</div>
       </div>
@@ -364,7 +364,7 @@
         Built by developers, for developers.
       </p>
       <div class="cta-actions">
-        <a href="#shorten" class="btn btn-primary btn-lg btn-glow btn-cta-scale">Start Shortening Now</a>
+        <a href="#shorten" class="btn btn-primary btn-lg btn-glow btn-cta-scale nav-anchor">Start Shortening Now</a>
         <a href="https://github.com/aminilay/shortdesk-official" target="_blank" class="btn btn-ghost btn-lg btn-cta-scale">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="margin-right:4px;flex-shrink:0"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.605-.015 2.896-.015 3.286 0 .315.21.694.825.576C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/></svg>
           View on GitHub
@@ -386,9 +386,9 @@
       <div class="footer-col">
         <h4 class="footer-col-title">Product</h4>
         <a href="/">Home</a>
-        <a href="#features">Features</a>
+        <a href="#features" class="nav-anchor">Features</a>
         <a href="/dashboard">Dashboard</a>
-        <a href="#shorten">Create Link</a>
+        <a href="#shorten" class="nav-anchor">Create Link</a>
       </div>
       <div class="footer-col">
         <h4 class="footer-col-title">Resources</h4>
@@ -411,7 +411,9 @@
 
   <!-- ============ SCRIPTS ============ -->
   <script>
-    // Tab switch
+    // ============================================================
+    //  TAB SWITCH
+    // ============================================================
     function switchTab(name, el) {
       document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
       document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
@@ -419,32 +421,69 @@
       el.classList.add('active');
     }
 
-    // Smooth scroll
-    document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+    // ============================================================
+    //  SMOOTH SCROLL — with nav-hide guard
+    // ============================================================
+    var isAnchorScroll = false;
+    var anchorTimeout = null;
+
+    document.querySelectorAll('.nav-anchor, a[href^="#"]').forEach(function(a) {
       a.addEventListener('click', function(e) {
-        var target = document.querySelector(this.getAttribute('href'));
+        var href = this.getAttribute('href');
+        if (!href || !href.startsWith('#')) return;
+        var target = document.querySelector(href);
         if (target) {
           e.preventDefault();
+          isAnchorScroll = true;
+          if (anchorTimeout) clearTimeout(anchorTimeout);
+
+          // Keep nav visible during scroll
+          nav.classList.remove('hidden');
+          nav.classList.add('scrolled');
+
           target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+          // Unlock after scroll settles
+          anchorTimeout = setTimeout(function() {
+            isAnchorScroll = false;
+            lastScroll = window.pageYOffset;
+          }, 1200);
+
+          // Update URL without jump
+          history.pushState(null, '', href);
         }
       });
     });
 
-    // Nav scroll behavior
+    // ============================================================
+    //  NAV SCROLL BEHAVIOR
+    // ============================================================
     var lastScroll = 0;
     var nav = document.getElementById('mainNav');
+
     window.addEventListener('scroll', function() {
       var current = window.pageYOffset;
+
+      // Background after 40px
       if (current > 40) {
         nav.classList.add('scrolled');
       } else {
         nav.classList.remove('scrolled');
       }
+
+      // Never hide during anchor scroll
+      if (isAnchorScroll) {
+        lastScroll = current;
+        return;
+      }
+
+      // Hide on scroll down past 300px
       if (current > lastScroll && current > 300) {
         nav.classList.add('hidden');
       } else {
         nav.classList.remove('hidden');
       }
+
       lastScroll = current;
     });
 
@@ -467,12 +506,16 @@
     });
 
     // ============================================================
-    //  COUNTER ANIMATION
+    //  COUNTER ANIMATIONS — triggered by IntersectionObserver
     // ============================================================
+    var countersAnimated = false;
+
     var counterObserver = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          animateCounters();
+        if (entry.isIntersecting && !countersAnimated) {
+          countersAnimated = true;
+          animateCountUp();
+          animateCountDown();
           counterObserver.unobserve(entry.target);
         }
       });
@@ -481,32 +524,68 @@
     var statsSection = document.querySelector('.stats-section');
     if (statsSection) counterObserver.observe(statsSection);
 
-    function animateCounters() {
-      document.querySelectorAll('.counter').forEach(function(el) {
-        var target = parseInt(el.getAttribute('data-target'));
+    // Count UP: 0 → target
+    function animateCountUp() {
+      document.querySelectorAll('.counter-up').forEach(function(el) {
+        var target = parseInt(el.getAttribute('data-target'), 10);
         var prefix = el.getAttribute('data-prefix') || '';
         var suffix = el.getAttribute('data-suffix') || '';
-        var duration = 1200;
-        var start = 0;
+        var sup = el.getAttribute('data-sup') || '';
+        var duration = 1600;
+        var startTime = null;
+
+        function step(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          // ease-out cubic
+          var eased = 1 - Math.pow(1 - progress, 3);
+          var current = Math.floor(eased * target);
+          el.innerHTML = prefix + current + suffix;
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            // Final value
+            if (sup) {
+              el.innerHTML = prefix + target + suffix + '<sup>' + sup + '</sup>';
+            } else {
+              el.innerHTML = prefix + target + suffix;
+            }
+          }
+        }
+
+        requestAnimationFrame(step);
+      });
+    }
+
+    // Count DOWN: from → 0
+    function animateCountDown() {
+      document.querySelectorAll('.counter-down').forEach(function(el) {
+        var from = parseInt(el.getAttribute('data-from'), 10);
+        var prefix = el.getAttribute('data-prefix') || '';
+        var suffix = el.getAttribute('data-suffix') || '';
+        var duration = 1600;
         var startTime = null;
 
         function step(timestamp) {
           if (!startTime) startTime = timestamp;
           var progress = Math.min((timestamp - startTime) / duration, 1);
           var eased = 1 - Math.pow(1 - progress, 3);
-          var current = Math.floor(eased * target);
-          el.textContent = prefix + current + suffix;
+          var current = Math.round(from - (eased * from));
+          el.innerHTML = prefix + current + suffix;
           if (progress < 1) {
             requestAnimationFrame(step);
           } else {
-            el.textContent = prefix + target + suffix;
+            el.innerHTML = prefix + '0' + suffix;
           }
         }
+
         requestAnimationFrame(step);
       });
     }
 
-    // Hero parallax on mouse
+    // ============================================================
+    //  HERO PARALLAX ON MOUSE
+    // ============================================================
     var hero = document.getElementById('hero');
     var heroRight = document.querySelector('.hero-right');
     if (hero && heroRight) {
@@ -516,9 +595,14 @@
         var y = (e.clientY - rect.top) / rect.height - 0.5;
         heroRight.style.transform = 'translateY(' + (y * -10) + 'px) translateX(' + (x * 6) + 'px)';
       });
+      hero.addEventListener('mouseleave', function() {
+        heroRight.style.transform = 'translateY(0) translateX(0)';
+      });
     }
 
-    // Live demo animation
+    // ============================================================
+    //  LIVE DEMO ANIMATION
+    // ============================================================
     var demoRunning = false;
     function runDemo() {
       if (demoRunning) return;
@@ -533,6 +617,7 @@
       setTimeout(function() {
         step2.classList.remove('active');
         step3.classList.add('active');
+        // Typewriter effect for result URL
         var resultEl = document.getElementById('demoResultUrl');
         var fullText = 'https://shortdesk.app/Ab3xK9';
         resultEl.textContent = '';
@@ -555,12 +640,14 @@
       }, 2000);
     }
 
+    // Auto-run demo after 2.5s
     setTimeout(function() {
       if (!demoRunning) runDemo();
     }, 2500);
-  </script>
 
-  <script>
+    // ============================================================
+    //  ACTIVE NAV LINK
+    // ============================================================
     (function() {
       var path = window.location.pathname;
       var links = document.querySelectorAll('.nav-center a');
@@ -576,11 +663,15 @@
   </script>
 
   <script>
+    // ============================================================
+    //  THEME TOGGLE
+    // ============================================================
     (function() {
       var saved = localStorage.getItem('shortdesk-theme');
       if (saved) document.documentElement.setAttribute('data-theme', saved);
       updateIcon();
     })();
+
     function toggleTheme() {
       var current = document.documentElement.getAttribute('data-theme');
       var next = current === 'light' ? 'dark' : 'light';
@@ -588,6 +679,7 @@
       localStorage.setItem('shortdesk-theme', next);
       updateIcon();
     }
+
     function updateIcon() {
       var t = document.documentElement.getAttribute('data-theme');
       document.getElementById('themeIcon').innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
