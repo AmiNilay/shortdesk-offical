@@ -16,27 +16,30 @@
 </head>
 <body>
 
+  <div class="noise-overlay"></div>
+
   <!-- NAV -->
-  <nav class="landing-nav scrolled">
-    <div class="landing-nav-inner">
-      <a href="/" class="nav-logo">
-        <span class="nav-logo-mark">S</span>
-        <span class="nav-logo-text">ShortDesk</span>
-      </a>
-      <div class="nav-center">
-        <a href="/">Home</a>
-        <a href="#features">Features</a>
-        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
-        <a href="/dashboard">Dashboard</a>
-      </div>
-      <div class="nav-right">
-        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-          <span id="themeIcon">&#9789;</span>
-        </button>
-        <a href="/" class="btn btn-primary btn-sm nav-cta">New Link</a>
-      </div>
+<nav class="landing-nav" id="mainNav">
+  <div class="landing-nav-inner">
+    <a href="/" class="nav-logo">
+      <img src="/assets/dm.png" alt="ShortDesk" class="nav-logo-img logo-dark">
+      <img src="/assets/lm.png" alt="ShortDesk" class="nav-logo-img logo-light">
+      <span class="nav-logo-text">ShortDesk</span>
+    </a>
+    <div class="nav-center">
+      <a href="/">Home</a>
+      <a href="/#features">Features</a>
+      <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+      <a href="/dashboard">Dashboard</a>
     </div>
-  </nav>
+    <div class="nav-right">
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <span id="themeIcon">&#9789;</span>
+      </button>
+      <a href="/" class="btn btn-primary btn-sm nav-cta">New Link</a>
+    </div>
+  </div>
+</nav>
 
   <!-- PAGE HEADER -->
   <section class="page-header">
@@ -60,25 +63,25 @@
     <div class="dash-content-inner">
 
       <!-- STATS -->
-      <div class="dash-section">
+      <div class="dash-section reveal-scroll">
         <div class="analytics-stats-grid">
-          <div class="analytics-stat-card fade-row">
+          <div class="analytics-stat-card reveal-scroll" style="--reveal-delay:0s">
             <div class="analytics-stat-value"><%= link.totalClicks %></div>
             <div class="analytics-stat-label">Total Clicks</div>
           </div>
-          <div class="analytics-stat-card fade-row" style="animation-delay:0.05s">
+          <div class="analytics-stat-card reveal-scroll" style="--reveal-delay:0.05s">
             <div class="analytics-stat-value"><%= Object.keys(deviceBreakdown).length %></div>
             <div class="analytics-stat-label">Devices</div>
           </div>
-          <div class="analytics-stat-card fade-row" style="animation-delay:0.1s">
+          <div class="analytics-stat-card reveal-scroll" style="--reveal-delay:0.1s">
             <div class="analytics-stat-value"><%= Object.keys(browserBreakdown).length %></div>
             <div class="analytics-stat-label">Browsers</div>
           </div>
-          <div class="analytics-stat-card fade-row" style="animation-delay:0.15s">
+          <div class="analytics-stat-card reveal-scroll" style="--reveal-delay:0.15s">
             <div class="analytics-stat-value"><%= Object.keys(countryBreakdown).length %></div>
             <div class="analytics-stat-label">Countries</div>
           </div>
-          <div class="analytics-stat-card fade-row" style="animation-delay:0.2s">
+          <div class="analytics-stat-card reveal-scroll" style="--reveal-delay:0.2s">
             <div class="analytics-stat-value"><%= Object.keys(referrerBreakdown).length %></div>
             <div class="analytics-stat-label">Referrers</div>
           </div>
@@ -86,28 +89,27 @@
       </div>
 
       <!-- CLICKS OVER TIME -->
-      <div class="dash-section">
+      <div class="dash-section reveal-scroll">
         <div class="dash-section-header">
           <h2 class="dash-section-title">Clicks Over Time</h2>
         </div>
         <% if (Object.keys(clicksByDate).length < 2) { %>
-          <div class="dash-card">
+          <div class="dash-card reveal-scroll">
             <div class="chart-empty">
               <span>Not enough data yet</span>
               <p>At least 2 days of clicks needed to show a trend. Share your link to gather more data.</p>
             </div>
           </div>
         <% } else { %>
-          <div class="dash-card">
+          <div class="dash-card reveal-scroll" style="--reveal-delay:0.05s">
             <div class="bar-chart">
               <%
                 var dates = Object.keys(clicksByDate).sort().slice(-14);
                 dates.forEach(function(date) {
                   var h = Math.max(4, (clicksByDate[date] / maxClicksByDate) * 100);
-                  var hStyle = 'height:' + h + '%';
               %>
                 <div class="bar-wrapper">
-                  <div class="bar" style="<%= hStyle %>">
+                  <div class="bar" style="height:<%= h %>%">
                     <span class="bar-count"><%= clicksByDate[date] %></span>
                   </div>
                   <span class="bar-label"><%= date.slice(5) %></span>
@@ -119,14 +121,14 @@
       </div>
 
       <!-- BREAKDOWNS -->
-      <div class="dash-section">
+      <div class="dash-section reveal-scroll">
         <div class="dash-section-header">
           <h2 class="dash-section-title">Breakdowns</h2>
         </div>
         <div class="breakdowns-grid">
 
           <!-- Countries -->
-          <div class="dash-card fade-row">
+          <div class="dash-card reveal-scroll" style="--reveal-delay:0s">
             <h3 class="dash-card-title">Countries</h3>
             <% if (Object.keys(countryBreakdown).length === 0) { %>
               <div class="chart-empty small">No country data yet</div>
@@ -136,7 +138,7 @@
                 <div class="breakdown-row">
                   <span class="breakdown-label"><%= countryFlag(pair[0]) %> <%= pair[0] %></span>
                   <div class="breakdown-bar-wrapper">
-                    <div class="breakdown-bar" style="width:<%= pct + '%' %>"></div>
+                    <div class="breakdown-bar" style="width:<%= pct %>%"></div>
                   </div>
                   <span class="breakdown-count"><%= pair[1] %></span>
                 </div>
@@ -145,7 +147,7 @@
           </div>
 
           <!-- Devices -->
-          <div class="dash-card fade-row" style="animation-delay:0.05s">
+          <div class="dash-card reveal-scroll" style="--reveal-delay:0.05s">
             <h3 class="dash-card-title">Devices</h3>
             <% if (Object.keys(deviceBreakdown).length === 0) { %>
               <div class="chart-empty small">No device data yet</div>
@@ -155,7 +157,7 @@
                 <div class="breakdown-row">
                   <span class="breakdown-label"><%= pair[0] %></span>
                   <div class="breakdown-bar-wrapper">
-                    <div class="breakdown-bar" style="width:<%= pct + '%' %>"></div>
+                    <div class="breakdown-bar" style="width:<%= pct %>%"></div>
                   </div>
                   <span class="breakdown-count"><%= pair[1] %></span>
                 </div>
@@ -164,7 +166,7 @@
           </div>
 
           <!-- Browsers -->
-          <div class="dash-card fade-row" style="animation-delay:0.1s">
+          <div class="dash-card reveal-scroll" style="--reveal-delay:0.1s">
             <h3 class="dash-card-title">Browsers</h3>
             <% if (Object.keys(browserBreakdown).length === 0) { %>
               <div class="chart-empty small">No browser data yet</div>
@@ -174,7 +176,7 @@
                 <div class="breakdown-row">
                   <span class="breakdown-label"><%= pair[0] %></span>
                   <div class="breakdown-bar-wrapper">
-                    <div class="breakdown-bar" style="width:<%= pct + '%' %>"></div>
+                    <div class="breakdown-bar" style="width:<%= pct %>%"></div>
                   </div>
                   <span class="breakdown-count"><%= pair[1] %></span>
                 </div>
@@ -183,7 +185,7 @@
           </div>
 
           <!-- OS -->
-          <div class="dash-card fade-row" style="animation-delay:0.15s">
+          <div class="dash-card reveal-scroll" style="--reveal-delay:0.15s">
             <h3 class="dash-card-title">Operating Systems</h3>
             <% if (Object.keys(osBreakdown).length === 0) { %>
               <div class="chart-empty small">No OS data yet</div>
@@ -193,7 +195,7 @@
                 <div class="breakdown-row">
                   <span class="breakdown-label"><%= pair[0] %></span>
                   <div class="breakdown-bar-wrapper">
-                    <div class="breakdown-bar" style="width:<%= pct + '%' %>"></div>
+                    <div class="breakdown-bar" style="width:<%= pct %>%"></div>
                   </div>
                   <span class="breakdown-count"><%= pair[1] %></span>
                 </div>
@@ -202,7 +204,7 @@
           </div>
 
           <!-- Referrers -->
-          <div class="dash-card fade-row" style="animation-delay:0.2s">
+          <div class="dash-card reveal-scroll" style="--reveal-delay:0.2s">
             <h3 class="dash-card-title">Referrers</h3>
             <% if (Object.keys(referrerBreakdown).length === 0) { %>
               <div class="chart-empty small">No referrer data yet</div>
@@ -212,7 +214,7 @@
                 <div class="breakdown-row">
                   <span class="breakdown-label" title="<%= pair[0] %>"><%= pair[0] %></span>
                   <div class="breakdown-bar-wrapper">
-                    <div class="breakdown-bar" style="width:<%= pct + '%' %>"></div>
+                    <div class="breakdown-bar" style="width:<%= pct %>%"></div>
                   </div>
                   <span class="breakdown-count"><%= pair[1] %></span>
                 </div>
@@ -222,7 +224,7 @@
 
           <!-- Webhook -->
           <% if (link.webhookUrl) { %>
-            <div class="dash-card fade-row" style="animation-delay:0.25s">
+            <div class="dash-card reveal-scroll" style="--reveal-delay:0.25s">
               <h3 class="dash-card-title">Webhook</h3>
               <div class="webhook-info-card">
                 <p><strong>URL:</strong> <span style="word-break:break-all"><%= link.webhookUrl %></span></p>
@@ -243,13 +245,13 @@
       </div>
 
       <!-- RECENT CLICKS -->
-      <div class="dash-section">
+      <div class="dash-section reveal-scroll">
         <div class="dash-section-header">
           <h2 class="dash-section-title">Recent Clicks</h2>
           <span class="dash-section-count">Last <%= rowLimit %> events</span>
         </div>
 
-        <div class="dash-card">
+        <div class="dash-card reveal-scroll" style="--reveal-delay:0.05s">
           <form class="date-filter-form" method="GET" action="/analytics/<%= link.shortId %>">
             <div class="filter-row">
               <div class="filter-field">
@@ -293,7 +295,7 @@
                 </thead>
                 <tbody>
                   <% clicks.forEach(function(c, idx) { %>
-                    <tr class="fade-row" style="animation-delay:<%= idx * 0.02 %>s">
+                    <tr class="fade-row" style="--reveal-delay:<%= idx * 0.02 %>s">
                       <td><%= new Date(c.timestamp).toLocaleString() %></td>
                       <td><%= countryFlag(c.country || 'Unknown') %> <%= c.country || 'Unknown' %></td>
                       <td><%= c.device %></td>
@@ -319,32 +321,42 @@
   </section>
 
   <!-- FOOTER -->
-  <footer class="landing-footer">
-    <div class="footer-inner">
-      <div class="footer-brand">ShortDesk</div>
-      <div class="footer-links">
-        <a href="/">Home</a>
-        <a href="/dashboard">Dashboard</a>
-        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+<footer class="landing-footer">
+  <div class="footer-inner">
+    <div class="footer-col footer-brand-col">
+      <div class="footer-logo">
+        <img src="/assets/dm.png" alt="ShortDesk" class="footer-logo-img logo-dark">
+        <img src="/assets/lm.png" alt="ShortDesk" class="footer-logo-img logo-light">
+        <span class="footer-brand">ShortDesk</span>
       </div>
-      <div class="footer-copy">Built by <a href="https://github.com/aminilay" target="_blank">Nilay</a></div>
+      <p class="footer-tagline">Smart, trackable, password-protected short links. Open source and free forever.</p>
     </div>
-  </footer>
+    <div class="footer-col">
+      <h4 class="footer-col-title">Product</h4>
+      <a href="/">Home</a>
+      <a href="/#features">Features</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/">Create Link</a>
+    </div>
+    <div class="footer-col">
+      <h4 class="footer-col-title">Resources</h4>
+      <a href="/docs">Documentation</a>
+      <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+      <a href="https://github.com/aminilay/shortdesk-official/blob/main/LICENSE" target="_blank">License (MIT)</a>
+      <a href="https://github.com/aminilay/shortdesk-official/issues" target="_blank">Report Issue</a>
+    </div>
+    <div class="footer-col">
+      <h4 class="footer-col-title">Legal</h4>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/terms">Terms of Service</a>
+      <a href="https://github.com/aminilay" target="_blank">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2025 ShortDesk. Built by <a href="https://github.com/aminilay" target="_blank">Nilay</a></span>
+  </div>
+</footer>
 
-  <script>
-    (function() {
-      var path = window.location.pathname;
-      var links = document.querySelectorAll('.nav-center a');
-      links.forEach(function(link) {
-        var href = link.getAttribute('href');
-        if (href === '/' && (path === '/' || path === '')) {
-          link.classList.add('active');
-        } else if (href !== '/' && href !== '#features' && path.startsWith(href)) {
-          link.classList.add('active');
-        }
-      });
-    })();
-  </script>
   <script>
     (function() {
       var saved = localStorage.getItem('shortdesk-theme');
@@ -366,10 +378,15 @@
   <script>
     var observer = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
-        if (entry.isIntersecting) entry.target.classList.add('visible');
+        if (entry.isIntersecting) {
+          var delay = entry.target.style.getPropertyValue('--reveal-delay') || '0s';
+          entry.target.style.transitionDelay = delay;
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
       });
-    }, { threshold: 0.05 });
-    document.querySelectorAll('.fade-row, .dash-section, .dash-card, .analytics-stat-card').forEach(function(el) {
+    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+    document.querySelectorAll('.reveal-scroll, .fade-row, .dash-section, .dash-card, .analytics-stat-card').forEach(function(el) {
       observer.observe(el);
     });
   </script>

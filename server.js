@@ -20,6 +20,7 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -57,7 +58,7 @@ function countryFlag(code) {
 // Make countryFlag available in all EJS templates
 app.locals.countryFlag = countryFlag;
 
-// --- MongoDB Config Check  // UPDATED — allow test mode without crashing
+// --- MongoDB Config Check
 if (!MONGO_URI) {
   if (process.env.NODE_ENV === 'test') {
     console.warn('WARN: MONGO_URI not set — test mode, deferring connection.');
@@ -67,7 +68,7 @@ if (!MONGO_URI) {
   }
 }
 
-// --- MongoDB Connection  // UPDATED — guard against missing URI in tests
+// --- MongoDB Connection
 if (MONGO_URI) {
   mongoose.connect(MONGO_URI, { dbName: 'shortener' })
     .then(function() { console.log('MongoDB connected'); })
@@ -345,6 +346,19 @@ app.get('/', function(req, res) {
   res.render('index', { error: null, success: null });
 });
 
+// 1b. Static pages — MUST be before /:shortId catch-all
+app.get('/privacy', function(req, res) {
+  res.render('privacy');
+});
+
+app.get('/terms', function(req, res) {
+  res.render('terms');
+});
+
+app.get('/docs', function(req, res) {
+  res.render('docs');
+});
+
 // 2. Create Short Link (Single)
 app.post('/shorten', shortenLimiter, async function(req, res) {
   try {
@@ -362,7 +376,6 @@ app.post('/shorten', shortenLimiter, async function(req, res) {
       });
     }
 
-    // Safe Browsing Check
     var safety = await checkSafeBrowsing(originalUrl);
     if (!safety.safe) {
       return res.status(400).render('index', {
@@ -666,21 +679,6 @@ app.get('/api/qr/:shortId', async function(req, res) {
   }
 });
 
-// NEW — 6b. Privacy Policy Page
-app.get('/privacy', function(req, res) {
-  res.render('privacy');
-});
-
-// NEW — 6c. Terms of Service Page
-app.get('/terms', function(req, res) {
-  res.render('terms');
-});
-
-// NEW — 6d. Documentation Page
-app.get('/docs', function(req, res) {
-  res.render('docs');
-});
-
 // 7. Password Verification Page
 app.get('/:shortId/verify', async function(req, res) {
   try {
@@ -734,13 +732,11 @@ app.get('/:shortId', redirectLimiter, async function(req, res) {
     var shortId = req.params.shortId;
     var doc = null;
 
-    // Redis cache check
     if (redis) {
       var cached = await redis.get('url:' + shortId);
       if (cached) doc = JSON.parse(cached);
     }
 
-    // DB fallback
     if (!doc) {
       doc = await Url.findOne({ shortId: shortId }).lean();
       if (!doc) {
@@ -755,7 +751,6 @@ app.get('/:shortId', redirectLimiter, async function(req, res) {
       }
     }
 
-    // Expiration check + expiry webhook
     if (doc.expiresAt && new Date(doc.expiresAt) < new Date()) {
       if (doc.webhookUrl && !doc.expiryNotified) {
         fireWebhook(doc, 'link_expired');
@@ -764,7 +759,6 @@ app.get('/:shortId', redirectLimiter, async function(req, res) {
       return res.status(410).render('expired', { message: 'This link has expired.' });
     }
 
-    // Password check
     if (doc.passwordHash) {
       var authCookie = req.cookies && req.cookies['auth_' + shortId];
       if (authCookie !== 'verified') {
@@ -772,10 +766,8 @@ app.get('/:shortId', redirectLimiter, async function(req, res) {
       }
     }
 
-    // Redirect immediately
     res.redirect(302, doc.originalUrl);
 
-    // Fire-and-forget: increment clicks + webhook threshold check
     Url.findOneAndUpdate(
       { shortId: shortId },
       { $inc: { totalClicks: 1 } },
@@ -788,7 +780,6 @@ app.get('/:shortId', redirectLimiter, async function(req, res) {
       }
     }).catch(function() {});
 
-    // Queue analytics event with geolocation
     var ua = parseUserAgent(req.headers['user-agent']);
     var country = lookupCountry(req);
     queueClick({
