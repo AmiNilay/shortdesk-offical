@@ -24,9 +24,11 @@ app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
+
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
+
 app.set('trust proxy', true);
 
 // --- Environment Variables
@@ -41,9 +43,7 @@ let geoip = null;
 try {
   geoip = require('geoip-lite');
 } catch (e) {
-  if (process.env.NODE_ENV !== 'test') {
-    console.warn('geoip-lite not available');
-  }
+  // silently skip in all environments
 }
 
 // --- Country Flag Emoji Helper
@@ -61,30 +61,42 @@ function countryFlag(code) {
 app.locals.countryFlag = countryFlag;
 
 // --- MongoDB Config Check
-let mongoConnected = false;
-
 if (!MONGO_URI) {
-  if (process.env.NODE_ENV === 'test') {
-    if (process.env.NODE_ENV !== 'test') {
-      console.warn('WARN: MONGO_URI not set — test mode.');
-    }
-  } else {
+  if (process.env.NODE_ENV !== 'test') {
     console.error('ERROR: MONGO_URI is not defined.');
     process.exit(1);
   }
+  // In test mode without MONGO_URI, we run without a database
 }
 
 // --- MongoDB Connection
+let dbReady = false;
+
 if (MONGO_URI) {
   mongoose.connect(MONGO_URI, { dbName: 'shortener' })
     .then(function() {
-      mongoConnected = true;
+      dbReady = true;
       console.log('MongoDB connected');
     })
     .catch(function(err) {
       console.error('MongoDB connection error:', err.message);
       if (process.env.NODE_ENV !== 'test') process.exit(1);
     });
+}
+
+// Helper: check if DB is ready, fail fast if not
+function requireDb(req, res, fallbackStatus, fallbackBody) {
+  if (!dbReady) {
+    if (typeof fallbackBody === 'function') {
+      fallbackBody();
+    } else if (typeof fallbackBody === 'string') {
+      res.status(fallbackStatus).send(fallbackBody);
+    } else {
+      res.status(fallbackStatus).json(fallbackBody || { error: 'Database not available' });
+    }
+    return false;
+  }
+  return true;
 }
 
 // --- Optional Redis
@@ -96,7 +108,7 @@ if (REDIS_URL) {
     redis.on('connect', function() { console.log('Redis connected'); });
     redis.on('error', function(err) { console.error('Redis error:', err.message); });
   } catch (e) {
-    console.warn('Redis not available, using direct DB lookups');
+    // silently skip
   }
 }
 
@@ -241,7 +253,6 @@ async function checkSafeBrowsing(url) {
     }
     return { safe: true };
   } catch (err) {
-    console.error('Safe Browsing check failed:', err.message);
     return { safe: true };
   }
 }
@@ -264,9 +275,8 @@ async function fireWebhook(doc, event) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    console.log('Webhook fired: ' + event + ' -> ' + doc.webhookUrl);
   } catch (err) {
-    console.error('Webhook failed:', err.message);
+    // silently fail
   }
 }
 
@@ -283,7 +293,7 @@ async function flushClickQueue() {
   try {
     await ClickEvent.insertMany(batch, { ordered: false });
   } catch (err) {
-    console.error('Click queue flush error:', err.message);
+    // silently fail
   }
 }
 
@@ -362,6 +372,13 @@ app.get('/docs', function(req, res) {
 
 // ---- 3. CREATE SHORT LINK (FORM) ----
 app.post('/shorten', shortenLimiter, async function(req, res) {
+  if (!requireDb(req, res, 500, function() {
+    res.status(500).render('index', {
+      error: 'Database unavailable. Please try again later.',
+      success: null
+    });
+  })) return;
+
   try {
     var originalUrl = req.body.originalUrl;
     var customAlias = req.body.customAlias;
@@ -461,6 +478,13 @@ app.post('/shorten', shortenLimiter, async function(req, res) {
 
 // ---- 4. BULK SHORTEN (FORM) ----
 app.post('/shorten/bulk', shortenLimiter, async function(req, res) {
+  if (!requireDb(req, res, 500, function() {
+    res.status(500).render('index', {
+      error: 'Database unavailable. Please try again later.',
+      success: null
+    });
+  })) return;
+
   try {
     var urls = req.body.urls;
     if (!urls || !urls.trim()) {
@@ -518,11 +542,12 @@ app.post('/shorten/bulk', shortenLimiter, async function(req, res) {
 
 // ---- 5. DASHBOARD ----
 app.get('/dashboard', async function(req, res) {
-  try {
-    var searchId = req.query.search || null;
-    var searchResults = [];
-    var errors = [];
+  var searchId = req.query.search || null;
+  var searchResults = [];
+  var errors = [];
+  var recentLinks = [];
 
+  if (dbReady) {
     if (searchId) {
       try {
         var doc = await Url.findOne({ shortId: searchId }).lean();
@@ -543,11 +568,10 @@ app.get('/dashboard', async function(req, res) {
           errors.push('No link found with ID: ' + searchId);
         }
       } catch (searchErr) {
-        errors.push('Search unavailable — database not connected.');
+        errors.push('Search unavailable.');
       }
     }
 
-    var recentLinks = [];
     try {
       var recentDocs = await Url.find().sort({ createdAt: -1 }).limit(50).lean();
       recentLinks = recentDocs.map(function(d) {
@@ -565,32 +589,24 @@ app.get('/dashboard', async function(req, res) {
         };
       });
     } catch (dbErr) {
-      console.error('Dashboard DB error:', dbErr.message);
+      // recentLinks stays empty
     }
-
-    res.render('dashboard', {
-      links: searchResults,
-      errors: errors,
-      totalLinks: recentLinks.length,
-      recentLinks: recentLinks,
-      searchId: searchId,
-      bulkResults: null
-    });
-  } catch (err) {
-    console.error('Dashboard error:', err.message);
-    res.status(500).render('dashboard', {
-      links: [],
-      errors: ['Something went wrong loading the dashboard.'],
-      totalLinks: 0,
-      recentLinks: [],
-      searchId: null,
-      bulkResults: null
-    });
   }
+
+  res.render('dashboard', {
+    links: searchResults,
+    errors: errors,
+    totalLinks: recentLinks.length,
+    recentLinks: recentLinks,
+    searchId: searchId,
+    bulkResults: null
+  });
 });
 
 // ---- 6. ANALYTICS PAGE ----
 app.get('/analytics/:shortId', async function(req, res) {
+  if (!requireDb(req, res, 503, 'Database unavailable')) return;
+
   try {
     var shortId = req.params.shortId;
     var from = req.query.from || '';
@@ -674,6 +690,8 @@ app.get('/analytics/:shortId', async function(req, res) {
 
 // ---- 7. QR CODE API (MUST be before /:shortId catch-all) ----
 app.get('/api/qr/:shortId', async function(req, res) {
+  if (!requireDb(req, res, 503, 'Database unavailable')) return;
+
   try {
     var shortId = req.params.shortId;
     var size = Math.min(parseInt(req.query.size) || 200, 500);
@@ -694,6 +712,8 @@ app.get('/api/qr/:shortId', async function(req, res) {
 
 // ---- 8. PASSWORD VERIFY PAGE ----
 app.get('/:shortId/verify', async function(req, res) {
+  if (!requireDb(req, res, 503, 'Database unavailable')) return;
+
   try {
     var shortId = req.params.shortId;
     var doc = await Url.findOne({ shortId: shortId }).lean();
@@ -712,6 +732,8 @@ app.get('/:shortId/verify', async function(req, res) {
 
 // ---- 9. PASSWORD VERIFY POST ----
 app.post('/:shortId/verify', async function(req, res) {
+  if (!requireDb(req, res, 503, 'Database unavailable')) return;
+
   try {
     var shortId = req.params.shortId;
     var password = req.body.password;
@@ -740,9 +762,13 @@ app.post('/:shortId/verify', async function(req, res) {
 });
 
 // ============================================================
-//  !! THIS IS THE CATCH-ALL REDIRECT — MUST BE AFTER ALL OTHER GET ROUTES !!
+//  !! CATCH-ALL REDIRECT — MUST BE AFTER ALL OTHER GET ROUTES !!
 // ============================================================
 app.get('/:shortId', redirectLimiter, async function(req, res) {
+  if (!requireDb(req, res, 404, function() {
+    res.status(404).render('expired', { message: 'Link not found.' });
+  })) return;
+
   try {
     var shortId = req.params.shortId;
     var doc = null;
@@ -815,10 +841,12 @@ app.get('/:shortId', redirectLimiter, async function(req, res) {
 });
 
 // ============================================================
-//  API ROUTES (JSON) — all use /api/ prefix so no conflict
+//  API ROUTES (JSON)
 // ============================================================
 
 app.post('/api/shorten', apiLimiter, async function(req, res) {
+  if (!requireDb(req, res, 500, { error: 'Database not available' })) return;
+
   try {
     var url = req.body.url;
     var customAlias = req.body.customAlias;
@@ -875,6 +903,8 @@ app.post('/api/shorten', apiLimiter, async function(req, res) {
 });
 
 app.post('/api/shorten/bulk', apiLimiter, async function(req, res) {
+  if (!requireDb(req, res, 500, { error: 'Database not available' })) return;
+
   try {
     var urls = req.body.urls;
     if (!Array.isArray(urls) || urls.length === 0) {
@@ -916,6 +946,8 @@ app.post('/api/shorten/bulk', apiLimiter, async function(req, res) {
 });
 
 app.get('/api/analytics/:shortId', apiLimiter, async function(req, res) {
+  if (!requireDb(req, res, 500, { error: 'Database not available' })) return;
+
   try {
     var shortId = req.params.shortId;
     var doc = await Url.findOne({ shortId: shortId }).lean();
