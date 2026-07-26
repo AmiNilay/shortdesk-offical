@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Link Expired — ShortDesk</title>
+  <title>Link Unavailable — ShortDesk</title>
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -11,40 +11,104 @@
   <meta name="theme-color" content="#10b981">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <main class="container">
-    <nav class="nav-links">
-      <a href="/">Home</a>
-      <a href="/dashboard">Dashboard</a>
-      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-        <span id="themeIcon">&#9789;</span>
-      </button>
-    </nav>
 
-    <div class="expired-icon">&#9200;</div>
-    <h1 class="brand" style="font-size:1.6rem"><%= message %></h1>
-    <p class="expired-message">The link you are looking for has expired or does not exist.</p>
-    <a class="btn btn-primary" href="/">Create a New Link</a>
-  </main>
+  <div class="noise-overlay"></div>
 
-  <script>
-    (function() {
-      var path = window.location.pathname;
-      var links = document.querySelectorAll('.nav-links a');
-      links.forEach(function(link) {
-        var href = link.getAttribute('href');
-        if (href === '/' && (path === '/' || path === '')) {
-          link.classList.add('active');
-        } else if (href !== '/' && path.startsWith(href)) {
-          link.classList.add('active');
-        }
-      });
-    })();
-  </script>
+  <!-- NAV -->
+  <nav class="landing-nav scrolled">
+    <div class="landing-nav-inner">
+      <a href="/" class="nav-logo">
+        <img src="/assets/dm.png" alt="ShortDesk" class="nav-logo-img logo-dark">
+        <img src="/assets/lm.png" alt="ShortDesk" class="nav-logo-img logo-light">
+        <span class="nav-logo-text">ShortDesk</span>
+      </a>
+      <div class="nav-center">
+        <a href="/">Home</a>
+        <a href="/#features">Features</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+        <a href="/dashboard">Dashboard</a>
+      </div>
+      <div class="nav-right">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span id="themeIcon">&#9789;</span>
+        </button>
+        <a href="/" class="btn btn-primary btn-sm nav-cta">New Link</a>
+      </div>
+    </div>
+  </nav>
 
+  <!-- PAGE HEADER -->
+  <section class="page-header">
+    <div class="page-header-inner">
+      <div class="section-eyebrow">Unavailable</div>
+      <h1 class="page-title">Link Not Found</h1>
+      <p class="page-sub"><%= typeof message !== 'undefined' ? message : 'The link you are looking for has expired or does not exist.' %></p>
+    </div>
+  </section>
+
+  <!-- CONTENT -->
+  <section class="dash-content">
+    <div class="dash-content-inner" style="max-width:560px; margin:0 auto;">
+
+      <div class="dash-card reveal-scroll" style="text-align:center; padding:60px 40px;">
+        <div class="expired-icon" style="font-size:4rem; margin-bottom:20px;">&#128683;</div>
+        <h2 style="font-family:var(--font-display); font-weight:700; font-size:1.4rem; color:var(--text-primary); margin-bottom:12px; transition:color 0.3s;">
+          This link is no longer available
+        </h2>
+        <p class="expired-message" style="color:var(--text-muted); font-size:0.95rem; line-height:1.75; max-width:400px; margin:0 auto 28px; transition:color 0.3s;">
+          The link may have expired, been removed, or never existed. Try creating a new short link.
+        </p>
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <a href="/" class="btn btn-primary btn-lg">Create New Link</a>
+          <a href="/dashboard" class="btn btn-ghost btn-lg">Go to Dashboard</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="landing-footer">
+    <div class="footer-inner">
+      <div class="footer-col footer-brand-col">
+        <div class="footer-logo">
+          <img src="/assets/dm.png" alt="ShortDesk" class="footer-logo-img logo-dark">
+          <img src="/assets/lm.png" alt="ShortDesk" class="footer-logo-img logo-light">
+          <span class="footer-brand">ShortDesk</span>
+        </div>
+        <p class="footer-tagline">Smart, trackable, password-protected short links. Open source and free forever.</p>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-col-title">Product</h4>
+        <a href="/">Home</a>
+        <a href="/#features">Features</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/">Create Link</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-col-title">Resources</h4>
+        <a href="/docs">Documentation</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+        <a href="https://github.com/aminilay/shortdesk-official/blob/main/LICENSE" target="_blank">License (MIT)</a>
+        <a href="https://github.com/aminilay/shortdesk-official/issues" target="_blank">Report Issue</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-col-title">Legal</h4>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+        <a href="https://github.com/aminilay" target="_blank">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2025 ShortDesk. Built by <a href="https://github.com/aminilay" target="_blank">Nilay</a></span>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
   <script>
     (function() {
       var saved = localStorage.getItem('shortdesk-theme');
@@ -60,8 +124,24 @@
     }
     function updateIcon() {
       var t = document.documentElement.getAttribute('data-theme');
-      document.getElementById('themeIcon').innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
+      var el = document.getElementById('themeIcon');
+      if (el) el.innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
     }
+  </script>
+  <script>
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var delay = entry.target.style.getPropertyValue('--reveal-delay') || '0s';
+          entry.target.style.transitionDelay = delay;
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+    document.querySelectorAll('.reveal-scroll, .dash-card').forEach(function(el) {
+      observer.observe(el);
+    });
   </script>
 </body>
 </html>
