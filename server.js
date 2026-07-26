@@ -20,7 +20,6 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -55,13 +54,12 @@ function countryFlag(code) {
   }
 }
 
-// Make countryFlag available in all EJS templates
 app.locals.countryFlag = countryFlag;
 
 // --- MongoDB Config Check
 if (!MONGO_URI) {
   if (process.env.NODE_ENV === 'test') {
-    console.warn('WARN: MONGO_URI not set — test mode, deferring connection.');
+    console.warn('WARN: MONGO_URI not set — test mode.');
   } else {
     console.error('ERROR: MONGO_URI is not defined.');
     process.exit(1);
@@ -189,7 +187,6 @@ function hashIp(ip) {
   return crypto.createHash('sha256').update(ip || 'unknown').digest('hex').slice(0, 16);
 }
 
-// --- Geolocation
 function lookupCountry(req) {
   var vercelCountry = req.headers['x-vercel-ip-country'];
   if (vercelCountry) return vercelCountry;
@@ -204,7 +201,6 @@ function lookupCountry(req) {
   }
 }
 
-// --- Google Safe Browsing Check
 async function checkSafeBrowsing(url) {
   if (!GOOGLE_SAFE_BROWSING_KEY) return { safe: true };
   try {
@@ -239,7 +235,6 @@ async function checkSafeBrowsing(url) {
   }
 }
 
-// --- Webhook Firing
 async function fireWebhook(doc, event) {
   if (!doc.webhookUrl) return;
   try {
@@ -251,12 +246,8 @@ async function fireWebhook(doc, event) {
       totalClicks: doc.totalClicks,
       timestamp: new Date().toISOString()
     };
-    if (event === 'click_threshold_reached') {
-      payload.threshold = doc.clickThreshold;
-    }
-    if (event === 'link_expired') {
-      payload.expiredAt = doc.expiresAt;
-    }
+    if (event === 'click_threshold_reached') payload.threshold = doc.clickThreshold;
+    if (event === 'link_expired') payload.expiredAt = doc.expiresAt;
     await fetch(doc.webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -268,7 +259,6 @@ async function fireWebhook(doc, event) {
   }
 }
 
-// --- Analytics Queue
 var clickQueue = [];
 
 function queueClick(data) {
@@ -290,7 +280,6 @@ if (process.env.NODE_ENV !== 'test') {
   setInterval(flushClickQueue, 5000);
 }
 
-// --- Expiration
 var EXPIRY_OPTIONS = {
   '1h': 60 * 60 * 1000,
   '1d': 24 * 60 * 60 * 1000,
@@ -338,15 +327,16 @@ var apiLimiter = rateLimit({
 });
 
 // ============================================================
-//  ROUTES  (order matters!)
+//  ROUTES
+//  ORDER MATTERS — specific routes FIRST, /:shortId catch-all LAST
 // ============================================================
 
-// 1. Home Page
+// ---- 1. HOME ----
 app.get('/', function(req, res) {
   res.render('index', { error: null, success: null });
 });
 
-// 1b. Static pages — MUST be before /:shortId catch-all
+// ---- 2. STATIC PAGES (MUST be before /:shortId) ----
 app.get('/privacy', function(req, res) {
   res.render('privacy');
 });
@@ -359,7 +349,7 @@ app.get('/docs', function(req, res) {
   res.render('docs');
 });
 
-// 2. Create Short Link (Single)
+// ---- 3. CREATE SHORT LINK (FORM) ----
 app.post('/shorten', shortenLimiter, async function(req, res) {
   try {
     var originalUrl = req.body.originalUrl;
@@ -458,7 +448,7 @@ app.post('/shorten', shortenLimiter, async function(req, res) {
   }
 });
 
-// 3. Bulk URL Shortening
+// ---- 4. BULK SHORTEN (FORM) ----
 app.post('/shorten/bulk', shortenLimiter, async function(req, res) {
   try {
     var urls = req.body.urls;
@@ -479,13 +469,11 @@ app.post('/shorten/bulk', shortenLimiter, async function(req, res) {
         errors.push('Invalid: ' + url);
         continue;
       }
-
       var safety = await checkSafeBrowsing(url);
       if (!safety.safe) {
         errors.push('Malicious (' + safety.threat + '): ' + url);
         continue;
       }
-
       var codeResult = await generateShortCode();
       var doc = await Url.create({
         originalUrl: url,
@@ -517,7 +505,7 @@ app.post('/shorten/bulk', shortenLimiter, async function(req, res) {
   }
 });
 
-// 4. Dashboard
+// ---- 5. DASHBOARD ----
 app.get('/dashboard', async function(req, res) {
   try {
     var searchId = req.query.search || null;
@@ -574,7 +562,7 @@ app.get('/dashboard', async function(req, res) {
   }
 });
 
-// 5. Analytics Page
+// ---- 6. ANALYTICS PAGE ----
 app.get('/analytics/:shortId', async function(req, res) {
   try {
     var shortId = req.params.shortId;
@@ -585,7 +573,6 @@ app.get('/analytics/:shortId', async function(req, res) {
     if (!doc) return res.status(404).send('Link not found');
 
     var baseUrl = getBaseUrl(req);
-
     var dateFilter = { shortId: shortId };
     if (from || to) {
       dateFilter.timestamp = {};
@@ -658,7 +645,7 @@ app.get('/analytics/:shortId', async function(req, res) {
   }
 });
 
-// 6. QR Code Image Endpoint (MUST be before /:shortId catch-all)
+// ---- 7. QR CODE API (MUST be before /:shortId catch-all) ----
 app.get('/api/qr/:shortId', async function(req, res) {
   try {
     var shortId = req.params.shortId;
@@ -667,8 +654,7 @@ app.get('/api/qr/:shortId', async function(req, res) {
     if (!doc) return res.status(404).send('Link not found');
     var shortUrl = getBaseUrl(req) + '/' + doc.shortId;
     var buffer = await QRCode.toBuffer(shortUrl, {
-      width: size,
-      margin: 2,
+      width: size, margin: 2,
       color: { dark: '#000000', light: '#ffffff' }
     });
     res.set('Cache-Control', 'public, max-age=86400');
@@ -679,7 +665,7 @@ app.get('/api/qr/:shortId', async function(req, res) {
   }
 });
 
-// 7. Password Verification Page
+// ---- 8. PASSWORD VERIFY PAGE ----
 app.get('/:shortId/verify', async function(req, res) {
   try {
     var shortId = req.params.shortId;
@@ -697,7 +683,7 @@ app.get('/:shortId/verify', async function(req, res) {
   }
 });
 
-// 8. Password Verification POST
+// ---- 9. PASSWORD VERIFY POST ----
 app.post('/:shortId/verify', async function(req, res) {
   try {
     var shortId = req.params.shortId;
@@ -726,7 +712,9 @@ app.post('/:shortId/verify', async function(req, res) {
   }
 });
 
-// 9. Redirect (Core — catch-all, MUST be near the end)
+// ============================================================
+//  !! THIS IS THE CATCH-ALL REDIRECT — MUST BE AFTER ALL OTHER GET ROUTES !!
+// ============================================================
 app.get('/:shortId', redirectLimiter, async function(req, res) {
   try {
     var shortId = req.params.shortId;
@@ -799,7 +787,10 @@ app.get('/:shortId', redirectLimiter, async function(req, res) {
   }
 });
 
-// 10. API: Create Short Link (JSON)
+// ============================================================
+//  API ROUTES (JSON) — all use /api/ prefix so no conflict
+// ============================================================
+
 app.post('/api/shorten', apiLimiter, async function(req, res) {
   try {
     var url = req.body.url;
@@ -856,7 +847,6 @@ app.post('/api/shorten', apiLimiter, async function(req, res) {
   }
 });
 
-// 11. API: Bulk Shorten (JSON)
 app.post('/api/shorten/bulk', apiLimiter, async function(req, res) {
   try {
     var urls = req.body.urls;
@@ -898,7 +888,6 @@ app.post('/api/shorten/bulk', apiLimiter, async function(req, res) {
   }
 });
 
-// 12. API: Analytics (JSON)
 app.get('/api/analytics/:shortId', apiLimiter, async function(req, res) {
   try {
     var shortId = req.params.shortId;
@@ -924,13 +913,13 @@ app.get('/api/analytics/:shortId', apiLimiter, async function(req, res) {
   }
 });
 
-// 13. 404
+// ---- 404 CATCH-ALL ----
 app.use(function(req, res) {
   res.status(404).send('Page not found');
 });
 
 // ============================================================
-//  EXPORT & LOCAL START
+//  EXPORT & START
 // ============================================================
 
 module.exports = app;
