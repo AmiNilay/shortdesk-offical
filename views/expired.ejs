@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Link Expired — ShortDesk</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#10b981">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <main class="container">
+    <nav class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <span id="themeIcon">&#9789;</span>
+      </button>
+    </nav>
+
+    <div class="expired-icon">&#9200;</div>
+    <h1 class="brand" style="font-size:1.6rem"><%= message %></h1>
+    <p class="expired-message">The link you are looking for has expired or does not exist.</p>
+    <a class="btn btn-primary" href="/">Create a New Link</a>
+  </main>
+
+  <script>
+    (function() {
+      var path = window.location.pathname;
+      var links = document.querySelectorAll('.nav-links a');
+      links.forEach(function(link) {
+        var href = link.getAttribute('href');
+        if (href === '/' && (path === '/' || path === '')) {
+          link.classList.add('active');
+        } else if (href !== '/' && path.startsWith(href)) {
+          link.classList.add('active');
+        }
+      });
+    })();
+  </script>
+
+  <script>
+    (function() {
+      var saved = localStorage.getItem('shortdesk-theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+      updateIcon();
+    })();
+    function toggleTheme() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('shortdesk-theme', next);
+      updateIcon();
+    }
+    function updateIcon() {
+      var t = document.documentElement.getAttribute('data-theme');
+      document.getElementById('themeIcon').innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
+    }
+  </script>
+</body>
+</html>

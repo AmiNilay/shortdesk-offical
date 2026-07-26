@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard — ShortDesk</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#10b981">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="landing-nav scrolled">
+    <div class="landing-nav-inner">
+      <a href="/" class="nav-logo">
+        <span class="nav-logo-mark">S</span>
+        <span class="nav-logo-text">ShortDesk</span>
+      </a>
+      <div class="nav-center">
+        <a href="/">Home</a>
+        <a href="#features">Features</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+        <a href="/dashboard" class="active">Dashboard</a>
+      </div>
+      <div class="nav-right">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span id="themeIcon">&#9789;</span>
+        </button>
+        <a href="/" class="btn btn-primary btn-sm nav-cta">New Link</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <section class="page-header">
+    <div class="page-header-inner">
+      <div class="section-eyebrow">Manage</div>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-sub">Search, track, and manage all your shortened links in one place</p>
+    </div>
+  </section>
+
+  <!-- TOOLBAR -->
+  <section class="dash-toolbar">
+    <div class="dash-toolbar-inner">
+      <form class="search-form" method="GET" action="/dashboard">
+        <input type="text" name="search" placeholder="Search by short ID..."
+               value="<%= searchId || '' %>">
+        <button type="submit" class="btn btn-primary btn-sm">Search</button>
+      </form>
+      <a href="/" class="btn btn-ghost btn-sm">+ New Link</a>
+    </div>
+  </section>
+
+  <!-- CONTENT -->
+  <section class="dash-content">
+    <div class="dash-content-inner">
+
+      <% if (errors && errors.length > 0) { %>
+        <% errors.forEach(function(err) { %>
+          <div class="alert-error"><%= err %></div>
+        <% }) %>
+      <% } %>
+
+      <!-- SEARCH RESULTS -->
+      <% if (links && links.length > 0) { %>
+        <div class="dash-section">
+          <div class="dash-section-header">
+            <h2 class="dash-section-title">Search Results</h2>
+            <span class="dash-section-count"><%= links.length %> found</span>
+          </div>
+          <div class="dash-card">
+            <div class="table-container">
+              <table class="link-table">
+                <thead>
+                  <tr>
+                    <th>QR</th>
+                    <th>Short URL</th>
+                    <th>Original</th>
+                    <th>Status</th>
+                    <th>Clicks</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% links.forEach(function(link, idx) { %>
+                    <tr class="fade-row" style="animation-delay:<%= idx * 0.03 %>s">
+                      <td class="qr-cell">
+                        <img loading="lazy" src="/api/qr/<%= link.shortId %>?size=50"
+                             alt="QR" class="qr-thumb">
+                      </td>
+                      <td><a href="<%= link.shortUrl %>"><%= link.shortId %></a></td>
+                      <td class="url-cell" title="<%= link.originalUrl %>">
+                        <a href="<%= link.originalUrl %>" target="_blank"><%= link.originalUrl %></a>
+                      </td>
+                      <td>
+                        <% if (link.hasPassword) { %>
+                          <span class="badge badge-protected" title="Password protected">&#128274; Protected</span>
+                        <% } else { %>
+                          <span class="badge badge-open">Open</span>
+                        <% } %>
+                        <% if (link.webhookUrl) { %>
+                          <span class="badge badge-webhook" title="Webhook active">&#128276; Webhook</span>
+                        <% } %>
+                        <% if (link.expiresAt) { %>
+                          <% if (new Date(link.expiresAt) < new Date()) { %>
+                            <span class="badge badge-expired">Expired</span>
+                          <% } else { %>
+                            <span class="badge badge-expiry" title="Expires <%= new Date(link.expiresAt).toLocaleString() %>">
+                              &#9200; <%= new Date(link.expiresAt).toLocaleDateString() %>
+                            </span>
+                          <% } %>
+                        <% } %>
+                      </td>
+                      <td class="clicks-cell"><%= link.totalClicks %></td>
+                      <td><%= new Date(link.createdAt).toLocaleDateString() %></td>
+                      <td class="actions">
+                        <a href="/analytics/<%= link.shortId %>"
+                           class="btn btn-accent-outline btn-sm">Analytics</a>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- BULK RESULTS -->
+      <% if (bulkResults && bulkResults.length > 0) { %>
+        <div class="dash-section">
+          <div class="dash-section-header">
+            <h2 class="dash-section-title">Bulk Results</h2>
+            <span class="dash-section-count"><%= bulkResults.length %> shortened</span>
+          </div>
+          <div class="bulk-grid">
+            <% bulkResults.forEach(function(r, idx) { %>
+              <div class="bulk-result-item fade-row" style="animation-delay:<%= idx * 0.04 %>s">
+                <span style="font-size:0.8rem;color:var(--text-muted)" title="<%= r.originalUrl %>"><%= r.originalUrl %></span>
+                <a class="short-link" href="<%= r.shortUrl %>"><%= r.shortUrl %></a>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- RECENT LINKS -->
+      <% if (recentLinks && recentLinks.length > 0) { %>
+        <div class="dash-section">
+          <div class="dash-section-header">
+            <h2 class="dash-section-title">Recent Links</h2>
+            <span class="dash-section-count"><%= recentLinks.length %> total</span>
+          </div>
+          <div class="dash-card">
+            <div class="table-container">
+              <table class="link-table">
+                <thead>
+                  <tr>
+                    <th>QR</th>
+                    <th>Short ID</th>
+                    <th>Original URL</th>
+                    <th>Status</th>
+                    <th>Clicks</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% recentLinks.forEach(function(link, idx) { %>
+                    <tr class="fade-row" style="animation-delay:<%= idx * 0.03 %>s">
+                      <td class="qr-cell">
+                        <img loading="lazy" src="/api/qr/<%= link.shortId %>?size=50"
+                             alt="QR" class="qr-thumb">
+                      </td>
+                      <td><a href="<%= link.shortUrl %>"><%= link.shortId %></a></td>
+                      <td class="url-cell" title="<%= link.originalUrl %>">
+                        <a href="<%= link.originalUrl %>" target="_blank"><%= link.originalUrl %></a>
+                      </td>
+                      <td>
+                        <% if (link.hasPassword) { %>
+                          <span class="badge badge-protected" title="Password protected">&#128274; Protected</span>
+                        <% } else { %>
+                          <span class="badge badge-open">Open</span>
+                        <% } %>
+                        <% if (link.webhookUrl) { %>
+                          <span class="badge badge-webhook" title="Webhook active">&#128276; Webhook</span>
+                        <% } %>
+                        <% if (link.expiresAt) { %>
+                          <% if (new Date(link.expiresAt) < new Date()) { %>
+                            <span class="badge badge-expired">Expired</span>
+                          <% } else { %>
+                            <span class="badge badge-expiry" title="Expires <%= new Date(link.expiresAt).toLocaleString() %>">
+                              &#9200; <%= new Date(link.expiresAt).toLocaleDateString() %>
+                            </span>
+                          <% } %>
+                        <% } %>
+                      </td>
+                      <td class="clicks-cell"><%= link.totalClicks %></td>
+                      <td><%= new Date(link.createdAt).toLocaleDateString() %></td>
+                      <td class="actions">
+                        <a href="/analytics/<%= link.shortId %>"
+                           class="btn btn-accent-outline btn-sm">Analytics</a>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      <% } else if ((!links || links.length === 0) && (!bulkResults || bulkResults.length === 0)) { %>
+        <div class="empty-state-card">
+          <div class="empty-icon">&#128279;</div>
+          <h3>No links yet</h3>
+          <p>Create your first short link to see it here.</p>
+          <a href="/" class="btn btn-primary" style="margin-top:20px">Create a Link</a>
+        </div>
+      <% } %>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="landing-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">ShortDesk</div>
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+      </div>
+      <div class="footer-copy">Built by <a href="https://github.com/aminilay" target="_blank">Nilay</a></div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      var path = window.location.pathname;
+      var links = document.querySelectorAll('.nav-center a');
+      links.forEach(function(link) {
+        var href = link.getAttribute('href');
+        if (href === '/' && (path === '/' || path === '')) {
+          link.classList.add('active');
+        } else if (href !== '/' && href !== '#features' && path.startsWith(href)) {
+          link.classList.add('active');
+        }
+      });
+    })();
+  </script>
+  <script>
+    (function() {
+      var saved = localStorage.getItem('shortdesk-theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+      updateIcon();
+    })();
+    function toggleTheme() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('shortdesk-theme', next);
+      updateIcon();
+    }
+    function updateIcon() {
+      var t = document.documentElement.getAttribute('data-theme');
+      document.getElementById('themeIcon').innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
+    }
+  </script>
+  <script>
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.05 });
+    document.querySelectorAll('.fade-row, .dash-section, .dash-card, .bulk-result-item, .empty-state-card').forEach(function(el) {
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ShortDesk — Smart URL Shortener</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#10b981">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- NOISE OVERLAY -->
+  <div class="noise-overlay"></div>
+
+  <!-- ============ NAV ============ -->
+  <nav class="landing-nav" id="mainNav">
+    <div class="landing-nav-inner">
+      <a href="/" class="nav-logo">
+        <span class="nav-logo-mark">S</span>
+        <span class="nav-logo-text">ShortDesk</span>
+      </a>
+      <div class="nav-center">
+        <a href="/" class="active">Home</a>
+        <a href="#features">Features</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+        <a href="/dashboard">Dashboard</a>
+      </div>
+      <div class="nav-right">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span id="themeIcon">&#9789;</span>
+        </button>
+        <a href="#shorten" class="btn btn-primary btn-sm nav-cta">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="hero">
+    <div class="hero-blur-1"></div>
+    <div class="hero-blur-2"></div>
+    <div class="hero-blur-3"></div>
+    <div class="hero-grid-bg"></div>
+
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="trust-badges reveal">
+          <span class="trust-badge">&#10003; Open Source</span>
+          <span class="trust-badge">&#10003; MIT Licensed</span>
+          <span class="trust-badge">&#10003; 100% Free</span>
+        </div>
+
+        <h1 class="hero-title reveal" style="animation-delay:0.1s">
+          Short links.<br>
+          <span class="gradient-text">Big insights.</span>
+        </h1>
+
+        <p class="hero-sub reveal" style="animation-delay:0.2s">
+          Transform long URLs into clean, trackable short links with real-time analytics,
+          password protection, QR codes, and webhook notifications. Built for developers
+          who care about craft.
+        </p>
+
+        <div class="hero-actions reveal" style="animation-delay:0.3s">
+          <a href="#shorten" class="btn btn-primary btn-lg hero-cta-main">
+            Get Started Free
+            <span class="btn-arrow">&rarr;</span>
+          </a>
+          <a href="/dashboard" class="btn btn-ghost btn-lg">View Dashboard</a>
+        </div>
+      </div>
+
+      <div class="hero-right reveal" style="animation-delay:0.35s">
+        <!-- LIVE DEMO -->
+        <div class="live-demo glass-card" id="liveDemo">
+          <div class="live-demo-bar">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span class="live-demo-title">Live Demo</span>
+          </div>
+          <div class="live-demo-body">
+            <div class="demo-step demo-step-1 active" id="demoStep1">
+              <label class="demo-label">Paste any URL</label>
+              <div class="demo-input-wrap">
+                <input type="text" class="demo-input" id="demoInput"
+                       value="https://example.com/very/long/url/that/needs/shortening"
+                       readonly>
+                <button class="demo-btn" id="demoBtn" onclick="runDemo()">
+                  Shorten &rarr;
+                </button>
+              </div>
+            </div>
+            <div class="demo-step demo-step-2" id="demoStep2">
+              <div class="demo-loading">
+                <div class="demo-spinner"></div>
+                <span>Checking URL safety...</span>
+              </div>
+            </div>
+            <div class="demo-step demo-step-3" id="demoStep3">
+              <label class="demo-label">Your short link</label>
+              <div class="demo-result">
+                <div class="demo-result-url" id="demoResultUrl">https://shortdesk.app/Ab3xK9</div>
+                <button class="demo-copy-btn" id="demoCopyBtn" onclick="copyDemo()">Copy</button>
+              </div>
+              <div class="demo-qr" id="demoQr">
+                <div class="demo-qr-placeholder">
+                  <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                    <rect width="60" height="60" rx="8" fill="var(--border)"/>
+                    <rect x="10" y="10" width="16" height="16" rx="2" fill="var(--accent)"/>
+                    <rect x="34" y="10" width="16" height="16" rx="2" fill="var(--accent)"/>
+                    <rect x="10" y="34" width="16" height="16" rx="2" fill="var(--accent)"/>
+                    <rect x="34" y="34" width="6" height="6" rx="1" fill="var(--accent)"/>
+                    <rect x="44" y="34" width="6" height="6" rx="1" fill="var(--accent)"/>
+                    <rect x="34" y="44" width="6" height="6" rx="1" fill="var(--accent)"/>
+                    <rect x="44" y="44" width="6" height="6" rx="1" fill="var(--accent)"/>
+                  </svg>
+                </div>
+                <span class="demo-qr-label">QR Generated</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TERMINAL -->
+        <div class="hero-terminal glass-card">
+          <div class="terminal-bar">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span class="terminal-title">terminal</span>
+          </div>
+          <div class="terminal-body">
+            <div class="terminal-line">
+              <span class="t-prompt">$</span>
+              <span class="t-cmd">curl</span>
+              <span class="t-flag">-X POST</span>
+              <span class="t-url">/api/shorten</span>
+            </div>
+            <div class="terminal-line">
+              <span class="t-prompt"> </span>
+              <span class="t-dim">-d '{"url":"https://example.com"}'</span>
+            </div>
+            <div class="terminal-divider"></div>
+            <div class="terminal-line t-response">
+              <span class="t-dim">{</span>
+            </div>
+            <div class="terminal-line t-response">
+              <span class="t-key">  "shortUrl"</span>: <span class="t-val">"shortdesk.app/Ab3xK9"</span>,
+            </div>
+            <div class="terminal-line t-response">
+              <span class="t-key">  "totalClicks"</span>: <span class="t-num">0</span>,
+            </div>
+            <div class="terminal-line t-response">
+              <span class="t-key">  "hasPassword"</span>: <span class="t-num">false</span>
+            </div>
+            <div class="terminal-line t-response">
+              <span class="t-dim">}</span>
+            </div>
+            <div class="terminal-cursor"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES ============ -->
+  <section class="features" id="features">
+    <div class="features-inner">
+      <div class="section-header reveal-scroll">
+        <div class="section-eyebrow">Features</div>
+        <h2 class="section-title">Everything you need to manage links</h2>
+        <p class="section-sub">From creation to deep analytics. One tool, no bloat.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card feature-accent-emerald reveal-scroll" style="--reveal-delay:0.05s">
+          <div class="feature-card-glow"></div>
+          <div class="feature-icon-wrap">
+            <div class="feature-icon">&#9889;</div>
+          </div>
+          <h3>Lightning Fast Redirects</h3>
+          <p>Sub-100ms redirect with Redis caching. Base62 collision-safe codes generated at scale.</p>
+        </div>
+        <div class="feature-card feature-accent-blue reveal-scroll" style="--reveal-delay:0.1s">
+          <div class="feature-card-glow"></div>
+          <div class="feature-icon-wrap">
+            <div class="feature-icon">&#128202;</div>
+          </div>
+          <h3>Real-Time Analytics</h3>
+          <p>Click tracking with device, browser, OS, referrer, and country breakdowns. Date-range filtering built in.</p>
+        </div>
+        <div class="feature-card feature-accent-amber reveal-scroll" style="--reveal-delay:0.15s">
+          <div class="feature-card-glow"></div>
+          <div class="feature-icon-wrap">
+            <div class="feature-icon">&#128274;</div>
+          </div>
+          <h3>Password Protection</h3>
+          <p>Secure sensitive links with bcrypt-hashed passwords and session cookies. Full auth flow included.</p>
+        </div>
+        <div class="feature-card feature-accent-purple reveal-scroll" style="--reveal-delay:0.2s">
+          <div class="feature-card-glow"></div>
+          <div class="feature-icon-wrap">
+            <div class="feature-icon">&#128247;</div>
+          </div>
+          <h3>QR Code Generator</h3>
+          <p>Every short link gets an instant QR code. Download as PNG or embed via the API endpoint.</p>
+        </div>
+        <div class="feature-card feature-accent-rose reveal-scroll" style="--reveal-delay:0.25s">
+          <div class="feature-card-glow"></div>
+          <div class="feature-icon-wrap">
+            <div class="feature-icon">&#128276;</div>
+          </div>
+          <h3>Webhook Notifications</h3>
+          <p>Get notified when links hit click thresholds or expire. POST payloads to any endpoint.</p>
+        </div>
+        <div class="feature-card feature-accent-cyan reveal-scroll" style="--reveal-delay:0.3s">
+          <div class="feature-card-glow"></div>
+          <div class="feature-icon-wrap">
+            <div class="feature-icon">&#128737;</div>
+          </div>
+          <h3>Malicious URL Check</h3>
+          <p>Google Safe Browsing integration rejects known-malicious URLs before shortening. Security first.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section class="stats-section">
+    <div class="stats-inner">
+      <div class="stat-item reveal-scroll">
+        <div class="stat-number">
+          <span class="counter" data-target="100" data-suffix="ms" data-prefix="<">&lt;</span><span class="counter" data-target="100" data-suffix="ms"></span>
+        </div>
+        <div class="stat-desc">Average redirect with Redis</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item reveal-scroll" style="--reveal-delay:0.1s">
+        <div class="stat-number">
+          <span class="counter" data-target="50" data-suffix="+"></span>
+        </div>
+        <div class="stat-desc">Events batch-inserted per flush</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item reveal-scroll" style="--reveal-delay:0.2s">
+        <div class="stat-number">
+          <span class="counter-text">62<sup>n</sup></span>
+        </div>
+        <div class="stat-desc">Collision-safe base62 codes</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item reveal-scroll" style="--reveal-delay:0.3s">
+        <div class="stat-number">
+          <span class="counter" data-target="0" data-prefix="$"></span>
+        </div>
+        <div class="stat-desc">Completely free, open source</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SHORTEN ============ -->
+  <section class="shorten-section" id="shorten">
+    <div class="shorten-inner">
+      <div class="section-header reveal-scroll">
+        <div class="section-eyebrow">Get Started</div>
+        <h2 class="section-title">Start shortening in seconds</h2>
+        <p class="section-sub">Paste a link. Customize it. Share it. No signup required.</p>
+      </div>
+
+      <% if (error) { %>
+        <div class="alert-error"><%= error %></div>
+      <% } %>
+      <% if (success) { %>
+        <div class="alert-success"><%= success %></div>
+      <% } %>
+
+      <div class="shorten-card glass-card reveal-scroll">
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('single',this)">Single Link</button>
+          <button class="tab" onclick="switchTab('bulk',this)">Bulk Shorten</button>
+        </div>
+
+        <div id="tab-single" class="tab-content active">
+          <form class="form" method="POST" action="/shorten">
+            <div class="form-group form-group-lg">
+              <label for="originalUrl">Destination URL</label>
+              <div class="input-with-btn">
+                <input id="originalUrl" name="originalUrl" type="url"
+                       placeholder="https://example.com/your-long-url" required>
+                <button type="submit" class="btn btn-primary btn-glow">Shorten</button>
+              </div>
+            </div>
+
+            <div class="form-row-3">
+              <div class="form-group">
+                <label for="customAlias">Custom alias</label>
+                <input id="customAlias" name="customAlias" type="text"
+                       placeholder="my-link" pattern="[a-zA-Z0-9_-]{3,30}">
+              </div>
+              <div class="form-group">
+                <label for="expiry">Expires after</label>
+                <select id="expiry" name="expiry">
+                  <option value="never">Never</option>
+                  <option value="1h">1 Hour</option>
+                  <option value="1d">1 Day</option>
+                  <option value="7d">7 Days</option>
+                  <option value="30d">30 Days</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password"
+                       placeholder="Optional">
+              </div>
+            </div>
+
+            <details class="advanced-options">
+              <summary>Webhook &amp; Notifications</summary>
+              <div class="form-group" style="margin-top:12px">
+                <label for="webhookUrl">Webhook URL</label>
+                <input id="webhookUrl" name="webhookUrl" type="url"
+                       placeholder="https://your-webhook.com/notify">
+              </div>
+              <div class="form-group">
+                <label for="clickThreshold">Notify when clicks reach</label>
+                <input id="clickThreshold" name="clickThreshold" type="number"
+                       placeholder="e.g. 100" min="0">
+              </div>
+              <p class="field-hint">We POST a JSON payload when threshold is hit or link expires.</p>
+            </details>
+          </form>
+        </div>
+
+        <div id="tab-bulk" class="tab-content">
+          <form class="form" method="POST" action="/shorten/bulk">
+            <div class="form-group">
+              <label for="urls">Paste URLs (one per line)</label>
+              <textarea id="urls" name="urls"
+                        placeholder="https://example.com/page1&#10;https://example.com/page2"
+                        required></textarea>
+            </div>
+            <p class="field-hint">All URLs checked against Google Safe Browsing before shortening.</p>
+            <button type="submit" class="btn btn-primary btn-glow">Shorten All</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="cta-section">
+    <div class="cta-blur-1"></div>
+    <div class="cta-inner reveal-scroll">
+      <h2 class="cta-title">Start shortening links in under 30 seconds.</h2>
+      <p class="cta-sub">
+        No signup required. Open source. Deploy anywhere.
+        Built by developers, for developers.
+      </p>
+      <div class="cta-actions">
+        <a href="#shorten" class="btn btn-primary btn-lg btn-glow btn-cta-scale">Start Shortening Now</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank" class="btn btn-ghost btn-lg btn-cta-scale">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="margin-right:4px;flex-shrink:0"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.605-.015 2.896-.015 3.286 0 .315.21.694.825.576C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="landing-footer">
+    <div class="footer-inner">
+      <div class="footer-col footer-brand-col">
+        <div class="footer-logo">
+          <span class="nav-logo-mark" style="width:28px;height:28px;font-size:0.85rem">S</span>
+          <span class="footer-brand">ShortDesk</span>
+        </div>
+        <p class="footer-tagline">Smart, trackable, password-protected short links. Open source and free forever.</p>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-col-title">Product</h4>
+        <a href="/">Home</a>
+        <a href="#features">Features</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="#shorten">Create Link</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-col-title">Resources</h4>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">Documentation</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+        <a href="https://github.com/aminilay/shortdesk-official/blob/main/LICENSE" target="_blank">License (MIT)</a>
+        <a href="https://github.com/aminilay/shortdesk-official/issues" target="_blank">Report Issue</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-col-title">Legal</h4>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="https://github.com/aminilay" target="_blank">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2025 ShortDesk. Built by <a href="https://github.com/aminilay" target="_blank">Nilay</a></span>
+    </div>
+  </footer>
+
+  <!-- ============ SCRIPTS ============ -->
+  <script>
+    // Tab switch
+    function switchTab(name, el) {
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+      document.getElementById('tab-' + name).classList.add('active');
+      el.classList.add('active');
+    }
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+      a.addEventListener('click', function(e) {
+        var target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // Nav scroll behavior
+    var lastScroll = 0;
+    var nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', function() {
+      var current = window.pageYOffset;
+      if (current > 40) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+      if (current > lastScroll && current > 300) {
+        nav.classList.add('hidden');
+      } else {
+        nav.classList.remove('hidden');
+      }
+      lastScroll = current;
+    });
+
+    // ============================================================
+    //  SCROLL REVEAL — IntersectionObserver
+    // ============================================================
+    var revealObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var delay = entry.target.style.getPropertyValue('--reveal-delay') || '0s';
+          entry.target.style.transitionDelay = delay;
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal-scroll, .feature-card, .stat-item, .shorten-card').forEach(function(el) {
+      revealObserver.observe(el);
+    });
+
+    // ============================================================
+    //  COUNTER ANIMATION
+    // ============================================================
+    var counterObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          animateCounters();
+          counterObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    var statsSection = document.querySelector('.stats-section');
+    if (statsSection) counterObserver.observe(statsSection);
+
+    function animateCounters() {
+      document.querySelectorAll('.counter').forEach(function(el) {
+        var target = parseInt(el.getAttribute('data-target'));
+        var prefix = el.getAttribute('data-prefix') || '';
+        var suffix = el.getAttribute('data-suffix') || '';
+        var duration = 1200;
+        var start = 0;
+        var startTime = null;
+
+        function step(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var eased = 1 - Math.pow(1 - progress, 3);
+          var current = Math.floor(eased * target);
+          el.textContent = prefix + current + suffix;
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            el.textContent = prefix + target + suffix;
+          }
+        }
+        requestAnimationFrame(step);
+      });
+    }
+
+    // Hero parallax on mouse
+    var hero = document.getElementById('hero');
+    var heroRight = document.querySelector('.hero-right');
+    if (hero && heroRight) {
+      hero.addEventListener('mousemove', function(e) {
+        var rect = hero.getBoundingClientRect();
+        var x = (e.clientX - rect.left) / rect.width - 0.5;
+        var y = (e.clientY - rect.top) / rect.height - 0.5;
+        heroRight.style.transform = 'translateY(' + (y * -10) + 'px) translateX(' + (x * 6) + 'px)';
+      });
+    }
+
+    // Live demo animation
+    var demoRunning = false;
+    function runDemo() {
+      if (demoRunning) return;
+      demoRunning = true;
+      var step1 = document.getElementById('demoStep1');
+      var step2 = document.getElementById('demoStep2');
+      var step3 = document.getElementById('demoStep3');
+
+      step1.classList.remove('active');
+      step2.classList.add('active');
+
+      setTimeout(function() {
+        step2.classList.remove('active');
+        step3.classList.add('active');
+        var resultEl = document.getElementById('demoResultUrl');
+        var fullText = 'https://shortdesk.app/Ab3xK9';
+        resultEl.textContent = '';
+        var i = 0;
+        var typeInterval = setInterval(function() {
+          resultEl.textContent += fullText[i];
+          i++;
+          if (i >= fullText.length) clearInterval(typeInterval);
+        }, 35);
+      }, 1500);
+    }
+
+    function copyDemo() {
+      var btn = document.getElementById('demoCopyBtn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+
+    setTimeout(function() {
+      if (!demoRunning) runDemo();
+    }, 2500);
+  </script>
+
+  <script>
+    (function() {
+      var path = window.location.pathname;
+      var links = document.querySelectorAll('.nav-center a');
+      links.forEach(function(link) {
+        var href = link.getAttribute('href');
+        if (href === '/' && (path === '/' || path === '')) {
+          link.classList.add('active');
+        } else if (href !== '/' && href !== '#features' && path.startsWith(href)) {
+          link.classList.add('active');
+        }
+      });
+    })();
+  </script>
+
+  <script>
+    (function() {
+      var saved = localStorage.getItem('shortdesk-theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+      updateIcon();
+    })();
+    function toggleTheme() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('shortdesk-theme', next);
+      updateIcon();
+    }
+    function updateIcon() {
+      var t = document.documentElement.getAttribute('data-theme');
+      document.getElementById('themeIcon').innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Link Created — ShortDesk</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#10b981">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="landing-nav scrolled">
+    <div class="landing-nav-inner">
+      <a href="/" class="nav-brand">ShortDesk</a>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/dashboard">Dashboard</a>
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span id="themeIcon">&#9789;</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- RESULT -->
+  <section class="page-header" style="padding-bottom:0">
+    <div class="page-header-inner">
+      <h1 class="page-title">Link Created</h1>
+      <p class="page-sub">Your short link is ready to share</p>
+    </div>
+  </section>
+
+  <section class="dash-content">
+    <div class="dash-content-inner" style="max-width:640px">
+
+      <div class="result-card fade-row visible">
+        <div class="field-group">
+          <div class="field-label">Short URL</div>
+          <div class="input-with-btn">
+            <input type="text" id="shortUrl" value="<%= shortUrl %>" readonly>
+            <button class="btn btn-primary btn-sm" onclick="copyLink()">Copy</button>
+          </div>
+        </div>
+
+        <div class="link-display">
+          <a href="<%= shortUrl %>" target="_blank"><%= shortUrl %></a>
+        </div>
+
+        <p style="margin:12px 0;font-size:0.85rem;color:var(--text-muted);word-break:break-all;">
+          <strong style="color:var(--text-primary);">Original:</strong>
+          <a href="<%= originalUrl %>" target="_blank"><%= originalUrl %></a>
+        </p>
+
+        <div class="meta-row">
+          <% if (hasPassword) { %>
+            <div class="meta-item">Status: <span>&#128274; Protected</span></div>
+          <% } %>
+          <% if (expiresAt) { %>
+            <div class="meta-item">Expires: <span><%= new Date(expiresAt).toLocaleDateString() %></span></div>
+          <% } %>
+          <% if (typeof webhookUrl !== 'undefined' && webhookUrl) { %>
+            <div class="meta-item">Webhook: <span>&#128276; Active</span></div>
+          <% } %>
+          <% if (typeof clickThreshold !== 'undefined' && clickThreshold > 0) { %>
+            <div class="meta-item">Alert at: <span><%= clickThreshold %> clicks</span></div>
+          <% } %>
+        </div>
+
+        <div class="qr-section">
+          <img src="<%= qrDataUrl %>" alt="QR Code">
+          <a class="btn btn-ghost btn-sm" href="<%= qrDataUrl %>"
+             download="qr-<%= shortId %>.png">Download QR</a>
+        </div>
+
+        <div class="button-group">
+          <a class="btn btn-primary" href="/">Create Another</a>
+          <a class="btn btn-ghost" href="/analytics/<%= shortId %>">View Analytics</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="landing-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">ShortDesk</div>
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+      </div>
+      <div class="footer-copy">Built by <a href="https://github.com/aminilay" target="_blank">Nilay</a></div>
+    </div>
+  </footer>
+
+  <script>
+    async function copyLink() {
+      var el = document.getElementById('shortUrl');
+      el.select();
+      try {
+        await navigator.clipboard.writeText(el.value);
+        var btn = document.querySelector('.input-with-btn .btn-sm');
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      } catch(e) {
+        document.execCommand('copy');
+      }
+    }
+  </script>
+  <script>
+    (function() {
+      var path = window.location.pathname;
+      var links = document.querySelectorAll('.nav-links a');
+      links.forEach(function(link) {
+        var href = link.getAttribute('href');
+        if (href === '/' && (path === '/' || path === '')) {
+          link.classList.add('active');
+        } else if (href !== '/' && path.startsWith(href)) {
+          link.classList.add('active');
+        }
+      });
+    })();
+  </script>
+  <script>
+    (function() {
+      var saved = localStorage.getItem('shortdesk-theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+      updateIcon();
+    })();
+    function toggleTheme() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('shortdesk-theme', next);
+      updateIcon();
+    }
+    function updateIcon() {
+      var t = document.documentElement.getAttribute('data-theme');
+      document.getElementById('themeIcon').innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
+    }
+  </script>
+</body>
+</html>

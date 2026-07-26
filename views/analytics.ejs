@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Analytics — ShortDesk</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#10b981">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="landing-nav scrolled">
+    <div class="landing-nav-inner">
+      <a href="/" class="nav-logo">
+        <span class="nav-logo-mark">S</span>
+        <span class="nav-logo-text">ShortDesk</span>
+      </a>
+      <div class="nav-center">
+        <a href="/">Home</a>
+        <a href="#features">Features</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+        <a href="/dashboard">Dashboard</a>
+      </div>
+      <div class="nav-right">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span id="themeIcon">&#9789;</span>
+        </button>
+        <a href="/" class="btn btn-primary btn-sm nav-cta">New Link</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <section class="page-header">
+    <div class="page-header-inner">
+      <div class="analytics-link-info">
+        <a href="<%= link.shortUrl %>" class="analytics-short-url"><%= link.shortUrl %></a>
+        <span class="analytics-arrow">&rarr;</span>
+        <span class="analytics-original" title="<%= link.originalUrl %>"><%= link.originalUrl %></span>
+      </div>
+      <h1 class="page-title">Analytics</h1>
+      <p class="page-sub">
+        Created <%= new Date(link.createdAt).toLocaleDateString() %>
+        <% if (link.hasPassword) { %> &middot; &#128274; Protected<% } %>
+        <% if (link.expiresAt) { %> &middot; &#9200; Expires <%= new Date(link.expiresAt).toLocaleDateString() %><% } %>
+      </p>
+    </div>
+  </section>
+
+  <!-- CONTENT -->
+  <section class="dash-content">
+    <div class="dash-content-inner">
+
+      <!-- STATS -->
+      <div class="dash-section">
+        <div class="analytics-stats-grid">
+          <div class="analytics-stat-card fade-row">
+            <div class="analytics-stat-value"><%= link.totalClicks %></div>
+            <div class="analytics-stat-label">Total Clicks</div>
+          </div>
+          <div class="analytics-stat-card fade-row" style="animation-delay:0.05s">
+            <div class="analytics-stat-value"><%= Object.keys(deviceBreakdown).length %></div>
+            <div class="analytics-stat-label">Devices</div>
+          </div>
+          <div class="analytics-stat-card fade-row" style="animation-delay:0.1s">
+            <div class="analytics-stat-value"><%= Object.keys(browserBreakdown).length %></div>
+            <div class="analytics-stat-label">Browsers</div>
+          </div>
+          <div class="analytics-stat-card fade-row" style="animation-delay:0.15s">
+            <div class="analytics-stat-value"><%= Object.keys(countryBreakdown).length %></div>
+            <div class="analytics-stat-label">Countries</div>
+          </div>
+          <div class="analytics-stat-card fade-row" style="animation-delay:0.2s">
+            <div class="analytics-stat-value"><%= Object.keys(referrerBreakdown).length %></div>
+            <div class="analytics-stat-label">Referrers</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLICKS OVER TIME -->
+      <div class="dash-section">
+        <div class="dash-section-header">
+          <h2 class="dash-section-title">Clicks Over Time</h2>
+        </div>
+        <% if (Object.keys(clicksByDate).length < 2) { %>
+          <div class="dash-card">
+            <div class="chart-empty">
+              <span>Not enough data yet</span>
+              <p>At least 2 days of clicks needed to show a trend. Share your link to gather more data.</p>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="dash-card">
+            <div class="bar-chart">
+              <%
+                var dates = Object.keys(clicksByDate).sort().slice(-14);
+                dates.forEach(function(date) {
+                  var h = Math.max(4, (clicksByDate[date] / maxClicksByDate) * 100);
+                  var hStyle = 'height:' + h + '%';
+              %>
+                <div class="bar-wrapper">
+                  <div class="bar" style="<%= hStyle %>">
+                    <span class="bar-count"><%= clicksByDate[date] %></span>
+                  </div>
+                  <span class="bar-label"><%= date.slice(5) %></span>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- BREAKDOWNS -->
+      <div class="dash-section">
+        <div class="dash-section-header">
+          <h2 class="dash-section-title">Breakdowns</h2>
+        </div>
+        <div class="breakdowns-grid">
+
+          <!-- Countries -->
+          <div class="dash-card fade-row">
+            <h3 class="dash-card-title">Countries</h3>
+            <% if (Object.keys(countryBreakdown).length === 0) { %>
+              <div class="chart-empty small">No country data yet</div>
+            <% } else { %>
+              <% Object.entries(countryBreakdown).sort(function(a,b){return b[1]-a[1]}).forEach(function(pair) { %>
+                <% var pct = Math.max(4, (pair[1]/Math.max(link.totalClicks,1))*100); %>
+                <div class="breakdown-row">
+                  <span class="breakdown-label"><%= countryFlag(pair[0]) %> <%= pair[0] %></span>
+                  <div class="breakdown-bar-wrapper">
+                    <div class="breakdown-bar" style="width:<%= pct + '%' %>"></div>
+                  </div>
+                  <span class="breakdown-count"><%= pair[1] %></span>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+
+          <!-- Devices -->
+          <div class="dash-card fade-row" style="animation-delay:0.05s">
+            <h3 class="dash-card-title">Devices</h3>
+            <% if (Object.keys(deviceBreakdown).length === 0) { %>
+              <div class="chart-empty small">No device data yet</div>
+            <% } else { %>
+              <% Object.entries(deviceBreakdown).sort(function(a,b){return b[1]-a[1]}).forEach(function(pair) { %>
+                <% var pct = Math.max(4, (pair[1]/Math.max(link.totalClicks,1))*100); %>
+                <div class="breakdown-row">
+                  <span class="breakdown-label"><%= pair[0] %></span>
+                  <div class="breakdown-bar-wrapper">
+                    <div class="breakdown-bar" style="width:<%= pct + '%' %>"></div>
+                  </div>
+                  <span class="breakdown-count"><%= pair[1] %></span>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+
+          <!-- Browsers -->
+          <div class="dash-card fade-row" style="animation-delay:0.1s">
+            <h3 class="dash-card-title">Browsers</h3>
+            <% if (Object.keys(browserBreakdown).length === 0) { %>
+              <div class="chart-empty small">No browser data yet</div>
+            <% } else { %>
+              <% Object.entries(browserBreakdown).sort(function(a,b){return b[1]-a[1]}).forEach(function(pair) { %>
+                <% var pct = Math.max(4, (pair[1]/Math.max(link.totalClicks,1))*100); %>
+                <div class="breakdown-row">
+                  <span class="breakdown-label"><%= pair[0] %></span>
+                  <div class="breakdown-bar-wrapper">
+                    <div class="breakdown-bar" style="width:<%= pct + '%' %>"></div>
+                  </div>
+                  <span class="breakdown-count"><%= pair[1] %></span>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+
+          <!-- OS -->
+          <div class="dash-card fade-row" style="animation-delay:0.15s">
+            <h3 class="dash-card-title">Operating Systems</h3>
+            <% if (Object.keys(osBreakdown).length === 0) { %>
+              <div class="chart-empty small">No OS data yet</div>
+            <% } else { %>
+              <% Object.entries(osBreakdown).sort(function(a,b){return b[1]-a[1]}).forEach(function(pair) { %>
+                <% var pct = Math.max(4, (pair[1]/Math.max(link.totalClicks,1))*100); %>
+                <div class="breakdown-row">
+                  <span class="breakdown-label"><%= pair[0] %></span>
+                  <div class="breakdown-bar-wrapper">
+                    <div class="breakdown-bar" style="width:<%= pct + '%' %>"></div>
+                  </div>
+                  <span class="breakdown-count"><%= pair[1] %></span>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+
+          <!-- Referrers -->
+          <div class="dash-card fade-row" style="animation-delay:0.2s">
+            <h3 class="dash-card-title">Referrers</h3>
+            <% if (Object.keys(referrerBreakdown).length === 0) { %>
+              <div class="chart-empty small">No referrer data yet</div>
+            <% } else { %>
+              <% Object.entries(referrerBreakdown).sort(function(a,b){return b[1]-a[1]}).forEach(function(pair) { %>
+                <% var pct = Math.max(4, (pair[1]/Math.max(link.totalClicks,1))*100); %>
+                <div class="breakdown-row">
+                  <span class="breakdown-label" title="<%= pair[0] %>"><%= pair[0] %></span>
+                  <div class="breakdown-bar-wrapper">
+                    <div class="breakdown-bar" style="width:<%= pct + '%' %>"></div>
+                  </div>
+                  <span class="breakdown-count"><%= pair[1] %></span>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+
+          <!-- Webhook -->
+          <% if (link.webhookUrl) { %>
+            <div class="dash-card fade-row" style="animation-delay:0.25s">
+              <h3 class="dash-card-title">Webhook</h3>
+              <div class="webhook-info-card">
+                <p><strong>URL:</strong> <span style="word-break:break-all"><%= link.webhookUrl %></span></p>
+                <% if (link.clickThreshold > 0) { %>
+                  <p><strong>Click threshold:</strong> <%= link.clickThreshold %>
+                    <% if (link.thresholdNotified) { %>
+                      <span class="badge badge-open">Notified</span>
+                    <% } else { %>
+                      <span class="badge badge-expiry">Waiting</span>
+                    <% } %>
+                  </p>
+                <% } %>
+              </div>
+            </div>
+          <% } %>
+
+        </div>
+      </div>
+
+      <!-- RECENT CLICKS -->
+      <div class="dash-section">
+        <div class="dash-section-header">
+          <h2 class="dash-section-title">Recent Clicks</h2>
+          <span class="dash-section-count">Last <%= rowLimit %> events</span>
+        </div>
+
+        <div class="dash-card">
+          <form class="date-filter-form" method="GET" action="/analytics/<%= link.shortId %>">
+            <div class="filter-row">
+              <div class="filter-field">
+                <label for="filterFrom">From</label>
+                <input type="date" id="filterFrom" name="from" value="<%= filterFrom %>">
+              </div>
+              <div class="filter-field">
+                <label for="filterTo">To</label>
+                <input type="date" id="filterTo" name="to" value="<%= filterTo %>">
+              </div>
+              <div class="filter-field">
+                <label for="filterLimit">Rows</label>
+                <select id="filterLimit" name="limit">
+                  <option value="50" <%= rowLimit === 50 ? 'selected' : '' %>>50</option>
+                  <option value="100" <%= rowLimit === 100 ? 'selected' : '' %>>100</option>
+                  <option value="250" <%= rowLimit === 250 ? 'selected' : '' %>>250</option>
+                  <option value="500" <%= rowLimit === 500 ? 'selected' : '' %>>500</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+              <% if (filterFrom || filterTo) { %>
+                <a href="/analytics/<%= link.shortId %>" class="btn btn-ghost btn-sm">Clear</a>
+              <% } %>
+            </div>
+          </form>
+
+          <% if (clicks.length === 0) { %>
+            <div class="chart-empty small">No clicks in this date range</div>
+          <% } else { %>
+            <div class="table-container">
+              <table class="link-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Country</th>
+                    <th>Device</th>
+                    <th>Browser</th>
+                    <th>OS</th>
+                    <th>Referrer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% clicks.forEach(function(c, idx) { %>
+                    <tr class="fade-row" style="animation-delay:<%= idx * 0.02 %>s">
+                      <td><%= new Date(c.timestamp).toLocaleString() %></td>
+                      <td><%= countryFlag(c.country || 'Unknown') %> <%= c.country || 'Unknown' %></td>
+                      <td><%= c.device %></td>
+                      <td><%= c.browser %></td>
+                      <td><%= c.os %></td>
+                      <td class="url-cell" title="<%= c.referrer || 'Direct' %>"><%= c.referrer || 'Direct' %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- BACK -->
+      <div class="button-group" style="margin-bottom:40px">
+        <a class="btn btn-ghost" href="/dashboard">Back to Dashboard</a>
+        <a class="btn btn-primary" href="/">Create New Link</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="landing-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">ShortDesk</div>
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+      </div>
+      <div class="footer-copy">Built by <a href="https://github.com/aminilay" target="_blank">Nilay</a></div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      var path = window.location.pathname;
+      var links = document.querySelectorAll('.nav-center a');
+      links.forEach(function(link) {
+        var href = link.getAttribute('href');
+        if (href === '/' && (path === '/' || path === '')) {
+          link.classList.add('active');
+        } else if (href !== '/' && href !== '#features' && path.startsWith(href)) {
+          link.classList.add('active');
+        }
+      });
+    })();
+  </script>
+  <script>
+    (function() {
+      var saved = localStorage.getItem('shortdesk-theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+      updateIcon();
+    })();
+    function toggleTheme() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('shortdesk-theme', next);
+      updateIcon();
+    }
+    function updateIcon() {
+      var t = document.documentElement.getAttribute('data-theme');
+      document.getElementById('themeIcon').innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
+    }
+  </script>
+  <script>
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.05 });
+    document.querySelectorAll('.fade-row, .dash-section, .dash-card, .analytics-stat-card').forEach(function(el) {
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
