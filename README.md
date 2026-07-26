@@ -2,6 +2,10 @@
 
 > A sleek, open-source URL shortener with password protection, analytics, QR codes, webhooks, and dark/light mode. Built with Node.js, Express, MongoDB Atlas, and EJS. Deployed on Vercel.
 
+<p align="center">
+  <img src="assets/shortdesk-banner.png" alt="ShortDesk Banner" width="100%" />
+</p>
+
 ---
 
 <p align="center">
@@ -14,7 +18,7 @@
 
 ---
 
-## Live Demo
+## Live
 
 **Visit Now:** [https://shortdesk-official.vercel.app](https://shortdesk-official.vercel.app)
 
@@ -333,4 +337,3 @@ Built by **Nilay** — [github.com/AmiNilay](https://github.com/AmiNilay)
   <strong>ShortDesk</strong> — Smart, trackable, password-protected short links.<br>
   Open source and free forever.
 </p>
-``
