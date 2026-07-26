@@ -24,7 +24,9 @@ app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(morgan('dev'));
+if (process.env.NODE_ENV !== 'test') {
+  app.use(morgan('dev'));
+}
 app.set('trust proxy', true);
 
 // --- Environment Variables
@@ -39,7 +41,9 @@ let geoip = null;
 try {
   geoip = require('geoip-lite');
 } catch (e) {
-  console.warn('geoip-lite not available');
+  if (process.env.NODE_ENV !== 'test') {
+    console.warn('geoip-lite not available');
+  }
 }
 
 // --- Country Flag Emoji Helper
@@ -57,9 +61,13 @@ function countryFlag(code) {
 app.locals.countryFlag = countryFlag;
 
 // --- MongoDB Config Check
+let mongoConnected = false;
+
 if (!MONGO_URI) {
   if (process.env.NODE_ENV === 'test') {
-    console.warn('WARN: MONGO_URI not set — test mode.');
+    if (process.env.NODE_ENV !== 'test') {
+      console.warn('WARN: MONGO_URI not set — test mode.');
+    }
   } else {
     console.error('ERROR: MONGO_URI is not defined.');
     process.exit(1);
@@ -69,7 +77,10 @@ if (!MONGO_URI) {
 // --- MongoDB Connection
 if (MONGO_URI) {
   mongoose.connect(MONGO_URI, { dbName: 'shortener' })
-    .then(function() { console.log('MongoDB connected'); })
+    .then(function() {
+      mongoConnected = true;
+      console.log('MongoDB connected');
+    })
     .catch(function(err) {
       console.error('MongoDB connection error:', err.message);
       if (process.env.NODE_ENV !== 'test') process.exit(1);
@@ -513,52 +524,68 @@ app.get('/dashboard', async function(req, res) {
     var errors = [];
 
     if (searchId) {
-      var doc = await Url.findOne({ shortId: searchId }).lean();
-      if (doc) {
-        searchResults.push({
-          originalUrl: doc.originalUrl,
-          shortUrl: getBaseUrl(req) + '/' + doc.shortId,
-          shortId: doc.shortId,
-          totalClicks: doc.totalClicks,
-          createdAt: doc.createdAt,
-          hasPassword: !!doc.passwordHash,
-          expiresAt: doc.expiresAt,
-          webhookUrl: doc.webhookUrl,
-          clickThreshold: doc.clickThreshold,
-          thresholdNotified: doc.thresholdNotified
-        });
-      } else {
-        errors.push('No link found with ID: ' + searchId);
+      try {
+        var doc = await Url.findOne({ shortId: searchId }).lean();
+        if (doc) {
+          searchResults.push({
+            originalUrl: doc.originalUrl,
+            shortUrl: getBaseUrl(req) + '/' + doc.shortId,
+            shortId: doc.shortId,
+            totalClicks: doc.totalClicks,
+            createdAt: doc.createdAt,
+            hasPassword: !!doc.passwordHash,
+            expiresAt: doc.expiresAt,
+            webhookUrl: doc.webhookUrl,
+            clickThreshold: doc.clickThreshold,
+            thresholdNotified: doc.thresholdNotified
+          });
+        } else {
+          errors.push('No link found with ID: ' + searchId);
+        }
+      } catch (searchErr) {
+        errors.push('Search unavailable — database not connected.');
       }
     }
 
-    var recentDocs = await Url.find().sort({ createdAt: -1 }).limit(50).lean();
-    var recentLinks = recentDocs.map(function(d) {
-      return {
-        originalUrl: d.originalUrl,
-        shortUrl: getBaseUrl(req) + '/' + d.shortId,
-        shortId: d.shortId,
-        totalClicks: d.totalClicks,
-        createdAt: d.createdAt,
-        hasPassword: !!d.passwordHash,
-        expiresAt: d.expiresAt,
-        webhookUrl: d.webhookUrl,
-        clickThreshold: d.clickThreshold,
-        thresholdNotified: d.thresholdNotified
-      };
-    });
+    var recentLinks = [];
+    try {
+      var recentDocs = await Url.find().sort({ createdAt: -1 }).limit(50).lean();
+      recentLinks = recentDocs.map(function(d) {
+        return {
+          originalUrl: d.originalUrl,
+          shortUrl: getBaseUrl(req) + '/' + d.shortId,
+          shortId: d.shortId,
+          totalClicks: d.totalClicks,
+          createdAt: d.createdAt,
+          hasPassword: !!d.passwordHash,
+          expiresAt: d.expiresAt,
+          webhookUrl: d.webhookUrl,
+          clickThreshold: d.clickThreshold,
+          thresholdNotified: d.thresholdNotified
+        };
+      });
+    } catch (dbErr) {
+      console.error('Dashboard DB error:', dbErr.message);
+    }
 
     res.render('dashboard', {
       links: searchResults,
       errors: errors,
-      totalLinks: recentDocs.length,
+      totalLinks: recentLinks.length,
       recentLinks: recentLinks,
       searchId: searchId,
       bulkResults: null
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Server error');
+    console.error('Dashboard error:', err.message);
+    res.status(500).render('dashboard', {
+      links: [],
+      errors: ['Something went wrong loading the dashboard.'],
+      totalLinks: 0,
+      recentLinks: [],
+      searchId: null,
+      bulkResults: null
+    });
   }
 });
 
