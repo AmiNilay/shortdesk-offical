@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Documentation — ShortDesk</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#10b981">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div class="noise-overlay"></div>
+
+  <!-- NAV -->
+  <nav class="landing-nav scrolled">
+    <div class="landing-nav-inner">
+      <a href="/" class="nav-logo">
+        <span class="nav-logo-mark">S</span>
+        <span class="nav-logo-text">ShortDesk</span>
+      </a>
+      <div class="nav-center">
+        <a href="/">Home</a>
+        <a href="/#features">Features</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+        <a href="/dashboard">Dashboard</a>
+      </div>
+      <div class="nav-right">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span id="themeIcon">&#9789;</span>
+        </button>
+        <a href="/" class="btn btn-primary btn-sm nav-cta">New Link</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <section class="page-header">
+    <div class="page-header-inner">
+      <div class="section-eyebrow">Resources</div>
+      <h1 class="page-title">Documentation</h1>
+      <p class="page-sub">Everything you need to use and deploy ShortDesk</p>
+    </div>
+  </section>
+
+  <!-- CONTENT -->
+  <section class="docs-section">
+    <div class="docs-inner">
+
+      <!-- SIDEBAR NAV -->
+      <aside class="docs-sidebar" id="docsSidebar">
+        <div class="docs-sidebar-sticky">
+          <h4 class="docs-sidebar-title">On this page</h4>
+          <nav class="docs-toc">
+            <a href="#quick-start" class="docs-toc-link active">Quick Start</a>
+            <a href="#create-link" class="docs-toc-link">Create a Short Link</a>
+            <a href="#custom-alias" class="docs-toc-link">Custom Alias</a>
+            <a href="#password-protection" class="docs-toc-link">Password Protection</a>
+            <a href="#expiry" class="docs-toc-link">Link Expiry</a>
+            <a href="#webhooks" class="docs-toc-link">Webhooks</a>
+            <a href="#analytics" class="docs-toc-link">Analytics</a>
+            <a href="#api" class="docs-toc-link">API Reference</a>
+            <a href="#self-host" class="docs-toc-link">Self-Hosting</a>
+            <a href="#tech-stack" class="docs-toc-link">Tech Stack</a>
+            <a href="#faq" class="docs-toc-link">FAQ</a>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <div class="docs-content">
+
+        <!-- QUICK START -->
+        <div class="docs-block reveal-scroll" id="quick-start">
+          <h2>Quick Start</h2>
+          <p>ShortDesk is a free, open-source URL shortener. No account required.</p>
+          <div class="docs-steps">
+            <div class="docs-step">
+              <span class="docs-step-num">1</span>
+              <div>
+                <h4>Go to the homepage</h4>
+                <p>Visit <code>/</code> or click <strong>Get Started</strong> in the navbar.</p>
+              </div>
+            </div>
+            <div class="docs-step">
+              <span class="docs-step-num">2</span>
+              <div>
+                <h4>Paste your URL</h4>
+                <p>Enter any valid URL in the input field.</p>
+              </div>
+            </div>
+            <div class="docs-step">
+              <span class="docs-step-num">3</span>
+              <div>
+                <h4>Click Shorten</h4>
+                <p>You will get a short URL, a copy button, and a QR code instantly.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CREATE LINK -->
+        <div class="docs-block reveal-scroll" id="create-link">
+          <h2>Create a Short Link</h2>
+          <p>
+            Enter any valid URL starting with <code>http://</code> or <code>https://</code>.
+            ShortDesk will generate a unique 6-character code using Base62 encoding.
+          </p>
+          <div class="docs-code-block">
+            <div class="docs-code-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+              <span class="docs-code-lang">Example</span>
+            </div>
+            <pre><code>Original:  https://example.com/very/long/path/to/page
+Shortened: https://your-domain.com/Ab3xK9</code></pre>
+          </div>
+        </div>
+
+        <!-- CUSTOM ALIAS -->
+        <div class="docs-block reveal-scroll" id="custom-alias">
+          <h2>Custom Alias</h2>
+          <p>
+            You can optionally provide a custom alias instead of the auto-generated code.
+            Aliases must be 3-30 characters, using letters, numbers, hyphens, and underscores.
+          </p>
+          <div class="docs-code-block">
+            <div class="docs-code-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+              <span class="docs-code-lang">Example</span>
+            </div>
+            <pre><code>Custom alias: my-portfolio
+Result:      https://your-domain.com/my-portfolio</code></pre>
+          </div>
+          <div class="docs-callout">
+            <strong>Note:</strong> If the alias is already taken, you will be asked to choose a different one.
+          </div>
+        </div>
+
+        <!-- PASSWORD PROTECTION -->
+        <div class="docs-block reveal-scroll" id="password-protection">
+          <h2>Password Protection</h2>
+          <p>
+            You can protect any link with a password. When someone visits a protected link,
+            they must enter the correct password before being redirected.
+          </p>
+          <ul>
+            <li>Passwords are hashed with <strong>bcrypt</strong> before storage</li>
+            <li>A session cookie is set on successful entry (expires in 24 hours)</li>
+            <li>The original URL is never exposed until authentication succeeds</li>
+          </ul>
+        </div>
+
+        <!-- EXPIRY -->
+        <div class="docs-block reveal-scroll" id="expiry">
+          <h2>Link Expiry</h2>
+          <p>Set an expiration time for any link. Available options:</p>
+          <div class="docs-table-wrap">
+            <table class="docs-table">
+              <thead>
+                <tr>
+                  <th>Option</th>
+                  <th>Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>never</code></td><td>Link never expires (default)</td></tr>
+                <tr><td><code>1h</code></td><td>1 hour from creation</td></tr>
+                <tr><td><code>1d</code></td><td>1 day from creation</td></tr>
+                <tr><td><code>7d</code></td><td>7 days from creation</td></tr>
+                <tr><td><code>30d</code></td><td>30 days from creation</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Expired links show a friendly expiration page instead of redirecting.</p>
+        </div>
+
+        <!-- WEBHOOKS -->
+        <div class="docs-block reveal-scroll" id="webhooks">
+          <h2>Webhooks</h2>
+          <p>
+            Get notified when your link hits a click threshold or expires. ShortDesk
+            sends a <code>POST</code> request to your webhook URL with this payload:
+          </p>
+          <div class="docs-code-block">
+            <div class="docs-code-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+              <span class="docs-code-lang">JSON Payload</span>
+            </div>
+            <pre><code>{
+  "event": "threshold_reached",
+  "shortId": "Ab3xK9",
+  "shortUrl": "https://your-domain.com/Ab3xK9",
+  "originalUrl": "https://example.com/long-path",
+  "totalClicks": 100,
+  "threshold": 100,
+  "timestamp": "2025-07-27T12:00:00.000Z"
+}</code></pre>
+          </div>
+          <p>For expiry events, <code>"event"</code> will be <code>"link_expired"</code>.</p>
+        </div>
+
+        <!-- ANALYTICS -->
+        <div class="docs-block reveal-scroll" id="analytics">
+          <h2>Analytics</h2>
+          <p>Every short link has a dedicated analytics page showing:</p>
+          <ul>
+            <li>Total clicks</li>
+            <li>Clicks over time (bar chart, last 14 days)</li>
+            <li>Country breakdown</li>
+            <li>Device, browser, and OS breakdowns</li>
+            <li>Referrer sources</li>
+            <li>Date-range filtering for click history</li>
+          </ul>
+          <p>
+            Access analytics from the Dashboard by clicking <strong>Analytics</strong>
+            next to any link, or visit <code>/analytics/{shortId}</code> directly.
+          </p>
+        </div>
+
+        <!-- API -->
+        <div class="docs-block reveal-scroll" id="api">
+          <h2>API Reference</h2>
+          <p>ShortDesk exposes a REST API for programmatic access.</p>
+
+          <h3>POST /shorten</h3>
+          <p>Shorten a URL via the API.</p>
+          <div class="docs-code-block">
+            <div class="docs-code-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+              <span class="docs-code-lang">curl</span>
+            </div>
+            <pre><code>curl -X POST https://your-domain.com/shorten \
+  -H "Content-Type: application/json" \
+  -d '{
+    "originalUrl": "https://example.com/long-path",
+    "customAlias": "my-link",
+    "password": "optional-password",
+    "expiry": "7d",
+    "webhookUrl": "https://your-webhook.com/notify",
+    "clickThreshold": 100
+  }'</code></pre>
+          </div>
+
+          <h3>GET /api/qr/{shortId}</h3>
+          <p>Get a QR code image for any short link.</p>
+          <div class="docs-code-block">
+            <div class="docs-code-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+              <span class="docs-code-lang">Example</span>
+            </div>
+            <pre><code>GET /api/qr/Ab3xK9?size=200
+Returns: PNG image (200x200)</code></pre>
+          </div>
+
+          <h3>GET /{shortId}</h3>
+          <p>
+            Redirects to the original URL. If the link is password-protected,
+            shows the password entry page.
+          </p>
+        </div>
+
+        <!-- SELF HOST -->
+        <div class="docs-block reveal-scroll" id="self-host">
+          <h2>Self-Hosting</h2>
+          <p>ShortDesk can be deployed on your own infrastructure.</p>
+
+          <h3>Prerequisites</h3>
+          <ul>
+            <li>Node.js 18+</li>
+            <li>MongoDB 6+ (or MongoDB Atlas)</li>
+            <li>Redis (optional, for caching redirects)</li>
+          </ul>
+
+          <h3>Installation</h3>
+          <div class="docs-code-block">
+            <div class="docs-code-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+              <span class="docs-code-lang">Terminal</span>
+            </div>
+            <pre><code># Clone the repository
+git clone https://github.com/aminilay/shortdesk-official.git
+cd shortdesk-official
+
+# Install dependencies
+npm install
+
+# Create environment file
+cp .env.example .env
+# Edit .env with your MongoDB URI and session secret
+
+# Start the server
+npm start</code></pre>
+          </div>
+
+          <h3>Environment Variables</h3>
+          <div class="docs-table-wrap">
+            <table class="docs-table">
+              <thead>
+                <tr>
+                  <th>Variable</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>MONGO_URI</code></td><td>Yes</td><td>MongoDB connection string</td></tr>
+                <tr><td><code>SESSION_SECRET</code></td><td>Yes</td><td>Secret for session cookies</td></tr>
+                <tr><td><code>PORT</code></td><td>No</td><td>Server port (default: 3000)</td></tr>
+                <tr><td><code>NODE_ENV</code></td><td>No</td><td><code>production</code> or <code>development</code></td></tr>
+                <tr><td><code>GOOGLE_SAFE_BROWSING_KEY</code></td><td>No</td><td>Google Safe Browsing API key</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Deploy to Vercel</h3>
+          <div class="docs-code-block">
+            <div class="docs-code-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+              <span class="docs-code-lang">Terminal</span>
+            </div>
+            <pre><code># Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
+
+# Set environment variables in Vercel dashboard
+# Settings → Environment Variables</code></pre>
+          </div>
+        </div>
+
+        <!-- TECH STACK -->
+        <div class="docs-block reveal-scroll" id="tech-stack">
+          <h2>Tech Stack</h2>
+          <div class="docs-table-wrap">
+            <table class="docs-table">
+              <thead>
+                <tr>
+                  <th>Layer</th>
+                  <th>Technology</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Runtime</td><td>Node.js</td></tr>
+                <tr><td>Framework</td><td>Express.js</td></tr>
+                <tr><td>Database</td><td>MongoDB + Mongoose</td></tr>
+                <tr><td>Cache</td><td>Redis (optional)</td></tr>
+                <tr><td>Template Engine</td><td>EJS</td></tr>
+                <tr><td>QR Codes</td><td>qrcode library</td></tr>
+                <tr><td>Password Hashing</td><td>bcrypt</td></tr>
+                <tr><td>URL Safety</td><td>Google Safe Browsing API</td></tr>
+                <tr><td>Deployment</td><td>Vercel</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="docs-block reveal-scroll" id="faq">
+          <h2>Frequently Asked Questions</h2>
+
+          <div class="docs-faq-item">
+            <h4>Is ShortDesk really free?</h4>
+            <p>Yes. It is 100% free, open-source software released under the MIT License. No hidden fees, no premium tiers.</p>
+          </div>
+
+          <div class="docs-faq-item">
+            <h4>Do I need an account?</h4>
+            <p>No. ShortDesk does not require user accounts. Just paste a URL and shorten it.</p>
+          </div>
+
+          <div class="docs-faq-item">
+            <h4>Can I use my own domain?</h4>
+            <p>Yes, if you self-host. Deploy ShortDesk on your server and configure your domain to point to it.</p>
+          </div>
+
+          <div class="docs-faq-item">
+            <h4>How long are links stored?</h4>
+            <p>Indefinitely, unless you set an expiry date. Self-hosted instances can configure their own retention policies.</p>
+          </div>
+
+          <div class="docs-faq-item">
+            <h4>Is there an API?</h4>
+            <p>Yes. See the <a href="#api">API Reference</a> section above for endpoint details and examples.</p>
+          </div>
+
+          <div class="docs-faq-item">
+            <h4>How do I report a bug?</h4>
+            <p>Open an issue on <a href="https://github.com/aminilay/shortdesk-official/issues" target="_blank">GitHub</a>.</p>
+          </div>
+        </div>
+
+        <!-- BOTTOM NAV -->
+        <div class="legal-nav-buttons reveal-scroll">
+          <a href="/privacy" class="btn btn-ghost">Privacy Policy</a>
+          <a href="/terms" class="btn btn-ghost">Terms of Service</a>
+          <a href="/" class="btn btn-primary">Back to Home</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="landing-footer">
+    <div class="footer-inner">
+      <div class="footer-col footer-brand-col">
+        <div class="footer-logo">
+          <span class="nav-logo-mark" style="width:28px;height:28px;font-size:0.85rem">S</span>
+          <span class="footer-brand">ShortDesk</span>
+        </div>
+        <p class="footer-tagline">Smart, trackable, password-protected short links. Open source and free forever.</p>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-col-title">Product</h4>
+        <a href="/">Home</a>
+        <a href="/#features">Features</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/">Create Link</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-col-title">Resources</h4>
+        <a href="/docs">Documentation</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+        <a href="https://github.com/aminilay/shortdesk-official/blob/main/LICENSE" target="_blank">License (MIT)</a>
+        <a href="https://github.com/aminilay/shortdesk-official/issues" target="_blank">Report Issue</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-col-title">Legal</h4>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+        <a href="https://github.com/aminilay" target="_blank">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2025 ShortDesk. Built by <a href="https://github.com/aminilay" target="_blank">Nilay</a></span>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      var saved = localStorage.getItem('shortdesk-theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+      updateIcon();
+    })();
+    function toggleTheme() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('shortdesk-theme', next);
+      updateIcon();
+    }
+    function updateIcon() {
+      var t = document.documentElement.getAttribute('data-theme');
+      document.getElementById('themeIcon').innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
+    }
+  </script>
+  <script>
+    // Scroll reveal
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var delay = entry.target.style.getPropertyValue('--reveal-delay') || '0s';
+          entry.target.style.transitionDelay = delay;
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('.reveal-scroll, .docs-block').forEach(function(el) {
+      observer.observe(el);
+    });
+
+    // TOC active state on scroll
+    var tocLinks = document.querySelectorAll('.docs-toc-link');
+    var sections = [];
+    tocLinks.forEach(function(link) {
+      var id = link.getAttribute('href').replace('#', '');
+      var section = document.getElementById(id);
+      if (section) sections.push({ el: section, link: link });
+    });
+
+    function updateToc() {
+      var scrollPos = window.scrollY + 120;
+      var current = sections[0];
+      sections.forEach(function(s) {
+        if (s.el.offsetTop <= scrollPos) current = s;
+      });
+      tocLinks.forEach(function(l) { l.classList.remove('active'); });
+      if (current) current.link.classList.add('active');
+    }
+
+    window.addEventListener('scroll', updateToc);
+    updateToc();
+  </script>
+</body>
+</html>

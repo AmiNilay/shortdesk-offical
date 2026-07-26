@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy Policy — ShortDesk</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#10b981">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div class="noise-overlay"></div>
+
+  <!-- NAV -->
+  <nav class="landing-nav scrolled">
+    <div class="landing-nav-inner">
+      <a href="/" class="nav-logo">
+        <span class="nav-logo-mark">S</span>
+        <span class="nav-logo-text">ShortDesk</span>
+      </a>
+      <div class="nav-center">
+        <a href="/">Home</a>
+        <a href="/#features">Features</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+        <a href="/dashboard">Dashboard</a>
+      </div>
+      <div class="nav-right">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span id="themeIcon">&#9789;</span>
+        </button>
+        <a href="/" class="btn btn-primary btn-sm nav-cta">New Link</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <section class="page-header">
+    <div class="page-header-inner">
+      <div class="section-eyebrow">Legal</div>
+      <h1 class="page-title">Privacy Policy</h1>
+      <p class="page-sub">Last updated: July 27, 2025</p>
+    </div>
+  </section>
+
+  <!-- CONTENT -->
+  <section class="legal-section">
+    <div class="legal-inner">
+
+      <div class="legal-card reveal-scroll">
+        <h2>1. Introduction</h2>
+        <p>
+          ShortDesk ("we", "us", "our") is an open-source URL shortening service.
+          This Privacy Policy explains how we collect, use, and protect information
+          when you use our service at shortdesk.app and any self-hosted instances.
+        </p>
+      </div>
+
+      <div class="legal-card reveal-scroll" style="--reveal-delay:0.05s">
+        <h2>2. Information We Collect</h2>
+        <h3>2.1 URLs You Submit</h3>
+        <p>
+          When you create a shortened link, we store the original URL, a generated
+          short code, and any optional metadata you provide (custom alias, password hash,
+          expiry date, webhook URL).
+        </p>
+        <h3>2.2 Click Analytics</h3>
+        <p>
+          When someone clicks a shortened link, we collect anonymous data including:
+        </p>
+        <ul>
+          <li>IP address (used to determine country, not stored long-term)</li>
+          <li>User-Agent string (parsed into device, browser, OS)</li>
+          <li>Referrer header</li>
+          <li>Timestamp of the click</li>
+        </ul>
+        <h3>2.3 No Account Data</h3>
+        <p>
+          ShortDesk does not require user accounts. We do not collect names, email
+          addresses, or passwords for authentication purposes.
+        </p>
+      </div>
+
+      <div class="legal-card reveal-scroll" style="--reveal-delay:0.1s">
+        <h2>3. How We Use Information</h2>
+        <p>We use collected data solely to:</p>
+        <ul>
+          <li>Redirect short URLs to their original destination</li>
+          <li>Provide click analytics to link creators</li>
+          <li>Enforce password protection and expiry rules</li>
+          <li>Send webhook notifications when thresholds are reached</li>
+          <li>Check URLs against Google Safe Browsing for security</li>
+        </ul>
+      </div>
+
+      <div class="legal-card reveal-scroll" style="--reveal-delay:0.15s">
+        <h2>4. Data Retention</h2>
+        <p>
+          Shortened links and their analytics are stored indefinitely unless:
+        </p>
+        <ul>
+          <li>The link has an expiry date set by the creator</li>
+          <li>The link creator requests deletion</li>
+          <li>A self-hosted instance has its own retention policies</li>
+        </ul>
+      </div>
+
+      <div class="legal-card reveal-scroll" style="--reveal-delay:0.2s">
+        <h2>5. Third-Party Services</h2>
+        <p>We use the following third-party services:</p>
+        <ul>
+          <li><strong>Google Safe Browsing API</strong> — to check submitted URLs for known threats. No personal data is sent.</li>
+          <li><strong>QR Code Generation</strong> — done server-side, no external API calls.</li>
+        </ul>
+        <p>
+          We do not sell, share, or transfer any data to third parties for advertising
+          or marketing purposes.
+        </p>
+      </div>
+
+      <div class="legal-card reveal-scroll" style="--reveal-delay:0.25s">
+        <h2>6. Cookies</h2>
+        <p>
+          ShortDesk uses a single session cookie for password-protected links.
+          This cookie is set only when you access a protected link and enter the
+          correct password. It contains no personal data and expires after 24 hours.
+        </p>
+        <p>
+          We also use <code>localStorage</code> to remember your theme preference
+          (dark/light mode). This data never leaves your browser.
+        </p>
+      </div>
+
+      <div class="legal-card reveal-scroll" style="--reveal-delay:0.3s">
+        <h2>7. Security</h2>
+        <p>
+          We take security seriously:
+        </p>
+        <ul>
+          <li>Passwords are hashed with bcrypt before storage</li>
+          <li>All URLs are checked against Google Safe Browsing</li>
+          <li>Rate limiting is applied to prevent abuse</li>
+          <li>The source code is open for public audit</li>
+        </ul>
+      </div>
+
+      <div class="legal-card reveal-scroll" style="--reveal-delay:0.35s">
+        <h2>8. Self-Hosted Instances</h2>
+        <p>
+          ShortDesk is open source and can be self-hosted. If you deploy your own
+          instance, you are the data controller and are responsible for your own
+          privacy compliance. This policy applies only to the official hosted version.
+        </p>
+      </div>
+
+      <div class="legal-card reveal-scroll" style="--reveal-delay:0.4s">
+        <h2>9. Your Rights</h2>
+        <p>You have the right to:</p>
+        <ul>
+          <li>Request deletion of links you created</li>
+          <li>Request a copy of analytics data for your links</li>
+          <li>Contact us with any privacy concerns</li>
+        </ul>
+      </div>
+
+      <div class="legal-card reveal-scroll" style="--reveal-delay:0.45s">
+        <h2>10. Changes to This Policy</h2>
+        <p>
+          We may update this policy from time to time. Changes will be posted on this
+          page with an updated revision date. Continued use of the service after changes
+          constitutes acceptance of the updated policy.
+        </p>
+      </div>
+
+      <div class="legal-card reveal-scroll" style="--reveal-delay:0.5s">
+        <h2>11. Contact</h2>
+        <p>
+          For privacy-related questions, open an issue on
+          <a href="https://github.com/aminilay/shortdesk-official/issues" target="_blank">GitHub</a>
+          or contact the maintainer at
+          <a href="https://github.com/aminilay" target="_blank">github.com/aminilay</a>.
+        </p>
+      </div>
+
+      <div class="legal-nav-buttons reveal-scroll" style="--reveal-delay:0.55s">
+        <a href="/terms" class="btn btn-ghost">Terms of Service</a>
+        <a href="/docs" class="btn btn-ghost">Documentation</a>
+        <a href="/" class="btn btn-primary">Back to Home</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="landing-footer">
+    <div class="footer-inner">
+      <div class="footer-col footer-brand-col">
+        <div class="footer-logo">
+          <span class="nav-logo-mark" style="width:28px;height:28px;font-size:0.85rem">S</span>
+          <span class="footer-brand">ShortDesk</span>
+        </div>
+        <p class="footer-tagline">Smart, trackable, password-protected short links. Open source and free forever.</p>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-col-title">Product</h4>
+        <a href="/">Home</a>
+        <a href="/#features">Features</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/">Create Link</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-col-title">Resources</h4>
+        <a href="/docs">Documentation</a>
+        <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
+        <a href="https://github.com/aminilay/shortdesk-official/blob/main/LICENSE" target="_blank">License (MIT)</a>
+        <a href="https://github.com/aminilay/shortdesk-official/issues" target="_blank">Report Issue</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-col-title">Legal</h4>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+        <a href="https://github.com/aminilay" target="_blank">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2025 ShortDesk. Built by <a href="https://github.com/aminilay" target="_blank">Nilay</a></span>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      var saved = localStorage.getItem('shortdesk-theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+      updateIcon();
+    })();
+    function toggleTheme() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('shortdesk-theme', next);
+      updateIcon();
+    }
+    function updateIcon() {
+      var t = document.documentElement.getAttribute('data-theme');
+      document.getElementById('themeIcon').innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
+    }
+  </script>
+  <script>
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var delay = entry.target.style.getPropertyValue('--reveal-delay') || '0s';
+          entry.target.style.transitionDelay = delay;
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('.reveal-scroll, .legal-card').forEach(function(el) {
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

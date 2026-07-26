@@ -57,19 +57,25 @@ function countryFlag(code) {
 // Make countryFlag available in all EJS templates
 app.locals.countryFlag = countryFlag;
 
-// --- MongoDB Config Check
+// --- MongoDB Config Check  // UPDATED — allow test mode without crashing
 if (!MONGO_URI) {
-  console.error('ERROR: MONGO_URI is not defined.');
-  process.exit(1);
+  if (process.env.NODE_ENV === 'test') {
+    console.warn('WARN: MONGO_URI not set — test mode, deferring connection.');
+  } else {
+    console.error('ERROR: MONGO_URI is not defined.');
+    process.exit(1);
+  }
 }
 
-// --- MongoDB Connection
-mongoose.connect(MONGO_URI, { dbName: 'shortener' })
-  .then(function() { console.log('MongoDB connected'); })
-  .catch(function(err) {
-    console.error('MongoDB connection error:', err.message);
-    process.exit(1);
-  });
+// --- MongoDB Connection  // UPDATED — guard against missing URI in tests
+if (MONGO_URI) {
+  mongoose.connect(MONGO_URI, { dbName: 'shortener' })
+    .then(function() { console.log('MongoDB connected'); })
+    .catch(function(err) {
+      console.error('MongoDB connection error:', err.message);
+      if (process.env.NODE_ENV !== 'test') process.exit(1);
+    });
+}
 
 // --- Optional Redis
 let redis = null;
@@ -658,6 +664,21 @@ app.get('/api/qr/:shortId', async function(req, res) {
     console.error('QR error:', err.message);
     res.status(500).send('QR generation failed');
   }
+});
+
+// NEW — 6b. Privacy Policy Page
+app.get('/privacy', function(req, res) {
+  res.render('privacy');
+});
+
+// NEW — 6c. Terms of Service Page
+app.get('/terms', function(req, res) {
+  res.render('terms');
+});
+
+// NEW — 6d. Documentation Page
+app.get('/docs', function(req, res) {
+  res.render('docs');
 });
 
 // 7. Password Verification Page
