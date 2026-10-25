@@ -1,0 +1,132 @@
+<!-- ============ GLOBAL NAVBAR ============ -->
+<nav class="landing-nav" id="mainNav">
+  <div class="landing-nav-inner">
+    <a href="/" class="nav-logo" aria-label="ShortDesk Home">
+      <img src="/assets/dm.png" alt="ShortDesk" class="nav-logo-img logo-dark">
+      <img src="/assets/lm.png" alt="ShortDesk" class="nav-logo-img logo-light">
+      <span class="nav-logo-text">ShortDesk</span>
+    </a>
+
+    <!-- Desktop Navigation Links -->
+    <div class="nav-center" id="navCenter">
+      <a href="/" data-nav="home">Home</a>
+      <a href="/dashboard" data-nav="dashboard">Dashboard</a>
+      <a href="/docs" data-nav="docs">Docs</a>
+      <a href="https://github.com/AmiNilay/shortdesk-offical" target="_blank" rel="noopener">GitHub</a>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="nav-right">
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light theme" title="Toggle theme">
+        <span id="themeIcon">&#9789;</span>
+      </button>
+
+      <a href="/app" class="btn btn-primary btn-sm nav-cta" id="navCtaBtn">
+        Get Started Free &rarr;
+      </a>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileNav()" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span class="hamburger-line line-1"></span>
+        <span class="hamburger-line line-2"></span>
+        <span class="hamburger-line line-3"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown Drawer -->
+  <div class="mobile-nav-drawer" id="mobileNavDrawer" aria-hidden="true">
+    <div class="mobile-nav-links">
+      <a href="/" data-nav="home" onclick="closeMobileNav()">
+        <span class="mobile-nav-icon">&#127968;</span> Home
+      </a>
+      <a href="/dashboard" data-nav="dashboard" onclick="closeMobileNav()">
+        <span class="mobile-nav-icon">&#128202;</span> Dashboard
+      </a>
+      <a href="/docs" data-nav="docs" onclick="closeMobileNav()">
+        <span class="mobile-nav-icon">&#128218;</span> Documentation
+      </a>
+      <a href="https://github.com/AmiNilay/shortdesk-offical" target="_blank" rel="noopener" onclick="closeMobileNav()">
+        <span class="mobile-nav-icon">&#10024;</span> GitHub Source
+      </a>
+    </div>
+    <div class="mobile-nav-footer">
+      <a href="/app" class="btn btn-primary btn-block" onclick="closeMobileNav()">
+        Get Started Free &rarr;
+      </a>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Mobile Nav Toggle
+  function toggleMobileNav() {
+    var drawer = document.getElementById('mobileNavDrawer');
+    var btn = document.getElementById('mobileMenuBtn');
+    if (!drawer || !btn) return;
+    var isOpen = drawer.classList.toggle('open');
+    btn.classList.toggle('active', isOpen);
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    drawer.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+  }
+
+  function closeMobileNav() {
+    var drawer = document.getElementById('mobileNavDrawer');
+    var btn = document.getElementById('mobileMenuBtn');
+    if (drawer) drawer.classList.remove('open');
+    if (btn) {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  // Theme support
+  (function initTheme() {
+    var saved = localStorage.getItem('shortdesk-theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+    updateThemeIcon();
+  })();
+
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('shortdesk-theme', next);
+    updateThemeIcon();
+  }
+
+  function updateThemeIcon() {
+    var t = document.documentElement.getAttribute('data-theme');
+    var el = document.getElementById('themeIcon');
+    if (el) el.innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
+  }
+
+  // Auto-highlight active navigation item
+  (function initActiveNav() {
+    var path = window.location.pathname.toLowerCase();
+    var navLinks = document.querySelectorAll('[data-nav]');
+    navLinks.forEach(function(link) {
+      var navKey = link.getAttribute('data-nav');
+      var isActive = false;
+      if (navKey === 'home' && (path === '/' || path === '')) isActive = true;
+      else if (navKey === 'app' && path.startsWith('/app')) isActive = true;
+      else if (navKey === 'dashboard' && (path.startsWith('/dashboard') || path.startsWith('/analytics'))) isActive = true;
+      else if (navKey === 'docs' && path.startsWith('/docs')) isActive = true;
+
+      if (isActive) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+  })();
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeMobileNav();
+  });
+  document.addEventListener('click', function(e) {
+    var nav = document.getElementById('mainNav');
+    if (nav && !nav.contains(e.target)) closeMobileNav();
+  });
+</script>
+

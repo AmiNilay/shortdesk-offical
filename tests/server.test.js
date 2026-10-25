@@ -90,6 +90,12 @@ describe('ShortDesk', () => {
     expect(res.text).toContain('API');
   });
 
+  test('GET /app returns 200 with platform studio', async () => {
+    const res = await request(app).get('/app');
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('Platform');
+  });
+
   // --- API ANALYTICS ---
   test('GET /api/analytics/nonexistent returns 404 or 500', async () => {
     const res = await request(app).get('/api/analytics/nonexistent');

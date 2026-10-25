@@ -13,7 +13,7 @@
   <a href="https://expressjs.com"><img src="https://img.shields.io/badge/Express.js-5.2-black?style=for-the-badge&logo=express&logoColor=white" alt="Express.js"></a>
   <a href="https://www.mongodb.com/atlas"><img src="https://img.shields.io/badge/MongoDB-Atlas-brightgreen?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB Atlas"></a>
   <a href="https://vercel.com"><img src="https://img.shields.io/badge/Deployed_on-Vercel-black?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel"></a>
-  <a href="https://github.com/AmiNilay/shortdesk-official"><img src="https://img.shields.io/badge/Open_Source-ff3366?style=for-the-badge&logo=github&logoColor=white" alt="Open Source"></a>
+  <a href="https://github.com/AmiNilay/shortdesk-offical"><img src="https://img.shields.io/badge/Open_Source-ff3366?style=for-the-badge&logo=github&logoColor=white" alt="Open Source"></a>
 </p>
 
 ---
@@ -119,8 +119,8 @@ shortdesk-official/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/AmiNilay/shortdesk-official.git
-cd shortdesk-official
+git clone https://github.com/AmiNilay/shortdesk-offical.git
+cd shortdesk-offical
 ```
 
 ### 2. Install Dependencies
@@ -174,7 +174,7 @@ git push origin main
 ### 2. Import on Vercel
 
 1. Go to [vercel.com/new](https://vercel.com/new)
-2. Import the `AmiNilay/shortdesk-official` repository
+2. Import the `AmiNilay/shortdesk-offical` repository
 3. Add environment variables in the Vercel dashboard:
    - `MONGO_URI` = your MongoDB Atlas connection string
    - `BASE_URL` = `https://shortdesk-official.vercel.app`
@@ -309,7 +309,7 @@ When configured, ShortDesk sends a POST request to your webhook URL with a JSON 
 
 ## License
 
-This project is licensed under the **MIT License**. See the [LICENSE](https://github.com/AmiNilay/shortdesk-official/blob/main/LICENSE) file for details.
+This project is licensed under the **MIT License**. See the [LICENSE](https://github.com/AmiNilay/shortdesk-offical/blob/main/LICENSE) file for details.
 
 ---
 
@@ -323,7 +323,7 @@ Contributions are welcome. To contribute:
 4. Push to the branch (`git push origin feature/your-feature`)
 5. Open a Pull Request
 
-Please open an [Issue](https://github.com/AmiNilay/shortdesk-official/issues) first for bugs or feature requests.
+Please open an [Issue](https://github.com/AmiNilay/shortdesk-offical/issues) first for bugs or feature requests.
 
 ---
 

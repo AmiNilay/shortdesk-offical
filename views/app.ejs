@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Get Started Free — ShortDesk</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#10b981">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- NOISE OVERLAY -->
+  <div class="noise-overlay"></div>
+
+  <!-- ============ NAV ============ -->
+  <%- include('partials/nav') %>
+
+  <!-- ============ PAGE HEADER ============ -->
+  <section class="page-header">
+    <div class="page-header-inner">
+      <div class="section-eyebrow">Platform</div>
+      <h1 class="page-title">Get Started Free</h1>
+      <p class="page-sub">Configure intelligent URLs with password encryption, expiration dates, custom slugs, and webhooks.</p>
+    </div>
+  </section>
+
+  <!-- ============ WORKSPACE CONTENT ============ -->
+  <section class="dash-content">
+    <div class="dash-content-inner" style="max-width:860px">
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert-error" style="margin-bottom:24px"><%= error %></div>
+      <% } %>
+      <% if (typeof success !== 'undefined' && success) { %>
+        <div class="alert-success" style="margin-bottom:24px"><%= success %></div>
+      <% } %>
+
+      <div class="dash-card reveal-scroll" style="padding:32px 28px;margin-bottom:32px">
+        <div class="tabs" style="margin-bottom:28px">
+          <button class="tab active" onclick="switchTab('single', this)">Single Link</button>
+          <button class="tab" onclick="switchTab('bulk', this)">Bulk Generation</button>
+        </div>
+
+        <!-- SINGLE LINK TAB -->
+        <div id="tab-single" class="tab-content active">
+          <form class="form" method="POST" action="/shorten">
+            <div class="form-group form-group-lg" style="margin-bottom:22px">
+              <label for="originalUrl" class="field-label">Destination URL</label>
+              <div class="input-with-btn">
+                <input id="originalUrl" name="originalUrl" type="url"
+                       placeholder="https://your-long-destination-url.com/campaign/offer" required autofocus>
+                <button type="submit" class="btn btn-primary btn-glow">Shorten &rarr;</button>
+              </div>
+            </div>
+
+            <div class="form-row-3" style="margin-bottom:20px">
+              <div class="form-group">
+                <label for="customAlias" class="field-label">Custom Alias (Optional)</label>
+                <input id="customAlias" name="customAlias" type="text"
+                       placeholder="e.g. launch2026" pattern="[a-zA-Z0-9_-]{3,30}"
+                       title="3-30 alphanumeric characters, dashes, or underscores">
+                <p class="field-hint">e.g. shortdesk.app/launch2026</p>
+              </div>
+
+              <div class="form-group">
+                <label for="expiry" class="field-label">Link Expiration</label>
+                <select id="expiry" name="expiry">
+                  <option value="never">Never (Permanent)</option>
+                  <option value="1h">1 Hour</option>
+                  <option value="1d">1 Day</option>
+                  <option value="7d">7 Days</option>
+                  <option value="30d">30 Days</option>
+                </select>
+                <p class="field-hint">Automatic 410 Gone after expiry</p>
+              </div>
+
+              <div class="form-group">
+                <label for="password" class="field-label">Password Protection</label>
+                <input id="password" name="password" type="password"
+                       placeholder="Optional password">
+                <p class="field-hint">bcrypt hashed before storage</p>
+              </div>
+            </div>
+
+            <details class="advanced-options" style="margin-top:16px;padding:16px;border-radius:var(--radius-sm);background:var(--input-bg);border:1px solid var(--border)">
+              <summary style="cursor:pointer;font-weight:600;color:var(--text-primary)">
+                &#9881; Webhook &amp; Automated Threshold Notifications
+              </summary>
+              <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div class="form-group">
+                  <label for="webhookUrl" class="field-label">Webhook Endpoint URL</label>
+                  <input id="webhookUrl" name="webhookUrl" type="url"
+                         placeholder="https://api.yourdomain.com/events/click">
+                </div>
+                <div class="form-group">
+                  <label for="clickThreshold" class="field-label">Milestone Notification</label>
+                  <input id="clickThreshold" name="clickThreshold" type="number"
+                         placeholder="e.g. 500 clicks" min="0">
+                </div>
+              </div>
+              <p class="field-hint" style="margin-top:8px">ShortDesk will fire an HTTP POST webhook payload whenever the click threshold is reached or when the link expires.</p>
+            </details>
+
+            <div style="margin-top:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+              <span style="color:var(--text-muted);font-size:12px">&#10003; Automatic Google Safe Browsing verification on all submissions</span>
+              <button type="submit" class="btn btn-primary btn-glow">Generate Link &rarr;</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- BULK SHORTEN TAB -->
+        <div id="tab-bulk" class="tab-content">
+          <form class="form" method="POST" action="/shorten/bulk">
+            <div class="form-group" style="margin-bottom:20px">
+              <label for="urls" class="field-label">Destination URLs (One per line, up to 50 links)</label>
+              <textarea id="urls" name="urls" rows="8"
+                        placeholder="https://example.com/blog/first-post&#10;https://example.com/store/product-1&#10;https://github.com/my-org/repo"
+                        required style="width:100%;font-family:var(--font-mono);resize:vertical"></textarea>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+              <p class="field-hint" style="margin:0">Each URL will be checked against Google Safe Browsing and given a collision-free Base62 short slug.</p>
+              <button type="submit" class="btn btn-primary btn-glow">Batch Shorten &rarr;</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- PLATFORM FEATURE HIGHLIGHTS -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:20px;margin-top:36px">
+        <div class="dash-card reveal-scroll" style="--reveal-delay:0.05s">
+          <h3 style="font-size:16px;font-family:var(--font-display);margin-bottom:8px">&#128274; Password Security</h3>
+          <p style="color:var(--text-muted);font-size:13px">Lock sensitive URLs behind an encrypted password gate. Visitors must enter the password to access the redirect.</p>
+        </div>
+
+        <div class="dash-card reveal-scroll" style="--reveal-delay:0.1s">
+          <h3 style="font-size:16px;font-family:var(--font-display);margin-bottom:8px">&#128202; Deep Analytics</h3>
+          <p style="color:var(--text-muted);font-size:13px">Track real-time devices, browsers, operating systems, referrers, and countries for every shortened link.</p>
+        </div>
+
+        <div class="dash-card reveal-scroll" style="--reveal-delay:0.15s">
+          <h3 style="font-size:16px;font-family:var(--font-display);margin-bottom:8px">&#9889; High Performance</h3>
+          <p style="color:var(--text-muted);font-size:13px">Optimized with sub-100ms redirect caching, batch click aggregation, and instant QR code generation.</p>
+        </div>
+      </div>
+
+      <!-- WORKSPACE SHORTCUTS -->
+      <div style="margin-top:40px;text-align:center">
+        <a href="/dashboard" class="btn btn-ghost btn-sm" style="margin-right:12px">Open Dashboard &rarr;</a>
+        <a href="/docs" class="btn btn-ghost btn-sm">Developer API Docs &rarr;</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <%- include('partials/footer') %>
+
+  <!-- ============ SCRIPTS ============ -->
+  <script>
+    function switchTab(name, el) {
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+      var target = document.getElementById('tab-' + name);
+      if (target) target.classList.add('active');
+      if (el) el.classList.add('active');
+    }
+  </script>
+
+  <script>
+    // Theme toggle
+    (function() {
+      var saved = localStorage.getItem('shortdesk-theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+      updateIcon();
+    })();
+
+    function toggleTheme() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('shortdesk-theme', next);
+      updateIcon();
+    }
+
+    function updateIcon() {
+      var t = document.documentElement.getAttribute('data-theme');
+      var icon = document.getElementById('themeIcon');
+      if (icon) icon.innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
+    }
+  </script>
+
+  <script>
+    // Reveal animation
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var delay = entry.target.style.getPropertyValue('--reveal-delay') || '0s';
+          entry.target.style.transitionDelay = delay;
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+    document.querySelectorAll('.reveal-scroll, .dash-card').forEach(function(el) {
+      observer.observe(el);
+    });
+  </script>
+
+  <!-- BACK TO TOP -->
+  <button class="back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+  </button>
+  <script src="/js/back-to-top.js" defer></script>
+</body>
+</html>
+

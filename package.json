@@ -15,6 +15,14 @@
   ],
   "author": "Nilay",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AmiNilay/shortdesk-offical.git"
+  },
+  "homepage": "https://github.com/AmiNilay/shortdesk-offical#readme",
+  "bugs": {
+    "url": "https://github.com/AmiNilay/shortdesk-offical/issues"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",

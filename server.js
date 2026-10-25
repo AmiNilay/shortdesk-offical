@@ -6,6 +6,12 @@
 // --- Load environment variables
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
+// --- DNS resolver setup (ensures reliable SRV lookups on Windows & local networks)
+const dns = require('dns');
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch (e) {}
+
 const express = require('express');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
@@ -344,9 +350,17 @@ var apiLimiter = rateLimit({
 //  ORDER: specific paths first, /:shortId catch-all near the end
 // ============================================================
 
+// ---- SYSTEM / PWA ROUTES (Prevent falling into /:shortId catch-all) ----
+app.get('/sw.js', function (req, res) { res.status(404).end(); });
+app.get('/service-worker.js', function (req, res) { res.status(404).end(); });
 // ---- 1. HOME PAGE ----
 app.get('/', function (req, res) {
   res.render('index', { error: null, success: null });
+});
+
+// ---- 1.1 PLATFORM APP STUDIO ----
+app.get('/app', function (req, res) {
+  res.render('app', { error: null, success: null });
 });
 
 // ---- 2. STATIC PAGES (MUST be before /:shortId catch-all) ----
@@ -374,14 +388,14 @@ app.post('/shorten', shortenLimiter, async function (req, res) {
 
     // --- Step 1: Validate input (no DB needed) ---
     if (!originalUrl || !isValidHttpUrl(originalUrl)) {
-      return res.status(400).render('index', {
+      return res.status(400).render('app', {
         error: 'Please enter a valid URL starting with http:// or https://',
         success: null
       });
     }
 
     if (customAlias && customAlias.trim() && !CUSTOM_ALIAS_REGEX.test(customAlias)) {
-      return res.status(400).render('index', {
+      return res.status(400).render('app', {
         error: 'Custom alias must be 3-30 characters: letters, numbers, _ or - only.',
         success: null
       });
@@ -389,7 +403,7 @@ app.post('/shorten', shortenLimiter, async function (req, res) {
 
     // --- Step 2: Check DB availability ---
     if (!dbReady) {
-      return res.status(500).render('index', {
+      return res.status(500).render('app', {
         error: 'Database unavailable. Please try again later.',
         success: null
       });
@@ -398,7 +412,7 @@ app.post('/shorten', shortenLimiter, async function (req, res) {
     // --- Step 3: Safe Browsing check ---
     var safety = await checkSafeBrowsing(originalUrl);
     if (!safety.safe) {
-      return res.status(400).render('index', {
+      return res.status(400).render('app', {
         error: 'This URL has been flagged as potentially malicious (' + safety.threat + '). Cannot shorten.',
         success: null
       });
@@ -409,7 +423,7 @@ app.post('/shorten', shortenLimiter, async function (req, res) {
     if (customAlias && customAlias.trim()) {
       var exists = await Url.findOne({ shortId: customAlias.trim() }).lean();
       if (exists) {
-        return res.status(409).render('index', {
+        return res.status(409).render('app', {
           error: 'That custom alias is already taken.',
           success: null
         });
@@ -455,8 +469,20 @@ app.post('/shorten', shortenLimiter, async function (req, res) {
     }
 
     res.render('result', {
+      link: {
+        shortId: doc.shortId,
+        originalUrl: doc.originalUrl,
+        shortUrl: shortUrl,
+        totalClicks: 0,
+        createdAt: doc.createdAt,
+        hasPassword: !!doc.passwordHash,
+        expiresAt: doc.expiresAt,
+        webhookUrl: doc.webhookUrl,
+        clickThreshold: doc.clickThreshold
+      },
       shortUrl: shortUrl,
       originalUrl: doc.originalUrl,
+      qrUrl: qrDataUrl,
       qrDataUrl: qrDataUrl,
       clicks: 0,
       createdAt: doc.createdAt,
@@ -468,7 +494,7 @@ app.post('/shorten', shortenLimiter, async function (req, res) {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).render('index', {
+    res.status(500).render('app', {
       error: 'Something went wrong. Please try again.',
       success: null
     });
@@ -481,14 +507,14 @@ app.post('/shorten/bulk', shortenLimiter, async function (req, res) {
     var urls = req.body.urls;
 
     if (!urls || !urls.trim()) {
-      return res.status(400).render('index', {
+      return res.status(400).render('app', {
         error: 'Please enter at least one URL.',
         success: null
       });
     }
 
     if (!dbReady) {
-      return res.status(500).render('index', {
+      return res.status(500).render('app', {
         error: 'Database unavailable. Please try again later.',
         success: null
       });
@@ -529,11 +555,12 @@ app.post('/shorten/bulk', shortenLimiter, async function (req, res) {
       totalLinks: results.length,
       recentLinks: [],
       searchId: null,
-      bulkResults: results
+      bulkResults: results,
+      success: null
     });
   } catch (err) {
     console.error(err);
-    res.status(500).render('index', {
+    res.status(500).render('app', {
       error: 'Bulk shortening failed.',
       success: null
     });
@@ -601,7 +628,8 @@ app.get('/dashboard', async function (req, res) {
     totalLinks: recentLinks.length,
     recentLinks: recentLinks,
     searchId: searchId,
-    bulkResults: null
+    bulkResults: null,
+    success: null
   });
 });
 

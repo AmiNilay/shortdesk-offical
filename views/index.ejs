@@ -14,33 +14,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
+<body class="home-page">
 
   <!-- NOISE OVERLAY -->
   <div class="noise-overlay"></div>
 
   <!-- ============ NAV ============ -->
-<nav class="landing-nav" id="mainNav">
-  <div class="landing-nav-inner">
-    <a href="/" class="nav-logo">
-      <img src="/assets/dm.png" alt="ShortDesk" class="nav-logo-img logo-dark">
-      <img src="/assets/lm.png" alt="ShortDesk" class="nav-logo-img logo-light">
-      <span class="nav-logo-text">ShortDesk</span>
-    </a>
-    <div class="nav-center">
-      <a href="/">Home</a>
-      <a href="/#features">Features</a>
-      <a href="https://github.com/AmiNilay/shortdesk-offical" target="_blank">GitHub</a>
-      <a href="/dashboard">Dashboard</a>
-    </div>
-    <div class="nav-right">
-      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-        <span id="themeIcon">&#9789;</span>
-      </button>
-      <a href="/" class="btn btn-primary btn-sm nav-cta">New Link</a>
-    </div>
-  </div>
-</nav>
+<%- include('partials/nav') %>
 
   <!-- ============ HERO ============ -->
   <section class="hero" id="hero">
@@ -69,7 +49,7 @@
         </p>
 
         <div class="hero-actions reveal" style="animation-delay:0.3s">
-          <a href="#shorten" class="btn btn-primary btn-lg hero-cta-main nav-anchor">
+          <a href="/app" class="btn btn-primary btn-lg hero-cta-main">
             Get Started Free
             <span class="btn-arrow">&rarr;</span>
           </a>
@@ -266,90 +246,45 @@
     </div>
   </section>
 
-  <!-- ============ SHORTEN ============ -->
-  <section class="shorten-section" id="shorten">
+  <!-- ============ PLATFORM SHOWCASE ============ -->
+  <section class="shorten-section" id="platform">
     <div class="shorten-inner">
       <div class="section-header reveal-scroll">
-        <div class="section-eyebrow">Get Started</div>
-        <h2 class="section-title">Start shortening in seconds</h2>
-        <p class="section-sub">Paste a link. Customize it. Share it. No signup required.</p>
+        <div class="section-eyebrow">The Platform</div>
+        <h2 class="section-title">Built as a dedicated link management suite</h2>
+        <p class="section-sub">Experience a focused workspace designed for lightning-fast shortening, privacy, and full control.</p>
       </div>
 
-      <% if (error) { %>
-        <div class="alert-error"><%= error %></div>
-      <% } %>
-      <% if (success) { %>
-        <div class="alert-success"><%= success %></div>
-      <% } %>
-
-      <div class="shorten-card glass-card reveal-scroll">
-        <div class="tabs">
-          <button class="tab active" onclick="switchTab('single',this)">Single Link</button>
-          <button class="tab" onclick="switchTab('bulk',this)">Bulk Shorten</button>
+      <div class="dash-card glass-card reveal-scroll" style="padding:40px 32px;text-align:center;position:relative;overflow:hidden">
+        <div style="max-width:640px;margin:0 auto">
+          <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;background:var(--accent-subtle);border:1px solid var(--accent-glow);color:var(--accent);font-size:12px;font-weight:600;margin-bottom:18px">
+            &#9889; Dedicated Studio &bull; Zero Registration Barrier
+          </div>
+          <h3 style="font-size:28px;font-family:var(--font-display);margin-bottom:14px;letter-spacing:-0.5px">ShortDesk Platform Studio</h3>
+          <p style="color:var(--text-muted);font-size:15px;line-height:1.7;margin-bottom:28px">
+            Configure custom slugs, lock sensitive links behind bcrypt passwords, set self-destruct timers, and generate bulk batches up to 50 URLs at once in our dedicated platform workspace.
+          </p>
+          <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap">
+            <a href="/dashboard" class="btn btn-ghost btn-lg">
+              Browse Active Links &rarr;
+            </a>
+          </div>
         </div>
 
-        <div id="tab-single" class="tab-content active">
-          <form class="form" method="POST" action="/shorten">
-            <div class="form-group form-group-lg">
-              <label for="originalUrl">Destination URL</label>
-              <div class="input-with-btn">
-                <input id="originalUrl" name="originalUrl" type="url"
-                       placeholder="https://example.com/your-long-url" required>
-                <button type="submit" class="btn btn-primary btn-glow">Shorten</button>
-              </div>
-            </div>
-
-            <div class="form-row-3">
-              <div class="form-group">
-                <label for="customAlias">Custom alias</label>
-                <input id="customAlias" name="customAlias" type="text"
-                       placeholder="my-link" pattern="[a-zA-Z0-9_-]{3,30}">
-              </div>
-              <div class="form-group">
-                <label for="expiry">Expires after</label>
-                <select id="expiry" name="expiry">
-                  <option value="never">Never</option>
-                  <option value="1h">1 Hour</option>
-                  <option value="1d">1 Day</option>
-                  <option value="7d">7 Days</option>
-                  <option value="30d">30 Days</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="password">Password</label>
-                <input id="password" name="password" type="password"
-                       placeholder="Optional">
-              </div>
-            </div>
-
-            <details class="advanced-options">
-              <summary>Webhook &amp; Notifications</summary>
-              <div class="form-group" style="margin-top:12px">
-                <label for="webhookUrl">Webhook URL</label>
-                <input id="webhookUrl" name="webhookUrl" type="url"
-                       placeholder="https://your-webhook.com/notify">
-              </div>
-              <div class="form-group">
-                <label for="clickThreshold">Notify when clicks reach</label>
-                <input id="clickThreshold" name="clickThreshold" type="number"
-                       placeholder="e.g. 100" min="0">
-              </div>
-              <p class="field-hint">We POST a JSON payload when threshold is hit or link expires.</p>
-            </details>
-          </form>
-        </div>
-
-        <div id="tab-bulk" class="tab-content">
-          <form class="form" method="POST" action="/shorten/bulk">
-            <div class="form-group">
-              <label for="urls">Paste URLs (one per line)</label>
-              <textarea id="urls" name="urls"
-                        placeholder="https://example.com/page1&#10;https://example.com/page2"
-                        required></textarea>
-            </div>
-            <p class="field-hint">All URLs checked against Google Safe Browsing before shortening.</p>
-            <button type="submit" class="btn btn-primary btn-glow">Shorten All</button>
-          </form>
+        <!-- THREE PILLARS -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;margin-top:40px;text-align:left">
+          <div style="padding:20px;border-radius:var(--radius-sm);background:var(--input-bg);border:1px solid var(--border)">
+            <div style="color:var(--accent);font-weight:700;margin-bottom:6px">&#10003; Single &amp; Bulk Studio</div>
+            <div style="color:var(--text-muted);font-size:13px">Shorten individual custom slugs or paste up to 50 URLs in one batch.</div>
+          </div>
+          <div style="padding:20px;border-radius:var(--radius-sm);background:var(--input-bg);border:1px solid var(--border)">
+            <div style="color:var(--accent);font-weight:700;margin-bottom:6px">&#10003; Password &amp; Expiry Gates</div>
+            <div style="color:var(--text-muted);font-size:13px">Client privacy with bcrypt hashing and automatic TTL expiration.</div>
+          </div>
+          <div style="padding:20px;border-radius:var(--radius-sm);background:var(--input-bg);border:1px solid var(--border)">
+            <div style="color:var(--accent);font-weight:700;margin-bottom:6px">&#10003; Webhook Automations</div>
+            <div style="color:var(--text-muted);font-size:13px">Get HTTP alerts delivered immediately upon milestone clicks or expiration.</div>
+          </div>
         </div>
       </div>
     </div>
@@ -365,8 +300,8 @@
         Built by developers, for developers.
       </p>
       <div class="cta-actions">
-        <a href="#shorten" class="btn btn-primary btn-lg btn-glow btn-cta-scale nav-anchor">Start Shortening Now</a>
-        <a href="https://github.com/aminilay/shortdesk-official" target="_blank" class="btn btn-ghost btn-lg btn-cta-scale">
+        <a href="/app" class="btn btn-primary btn-lg btn-glow btn-cta-scale">Get Started Free &rarr;</a>
+        <a href="https://github.com/AmiNilay/shortdesk-offical" target="_blank" class="btn btn-ghost btn-lg btn-cta-scale" rel="noopener">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="margin-right:4px;flex-shrink:0"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.605-.015 2.896-.015 3.286 0 .315.21.694.825.576C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/></svg>
           View on GitHub
         </a>
@@ -375,42 +310,7 @@
   </section>
 
   <!-- ============ FOOTER ============ -->
-  <!-- UPDATED — footer links now point to /privacy, /terms, /docs -->
-<footer class="landing-footer">
-  <div class="footer-inner">
-    <div class="footer-col footer-brand-col">
-      <div class="footer-logo">
-        <img src="/assets/dm.png" alt="ShortDesk" class="footer-logo-img logo-dark">
-        <img src="/assets/lm.png" alt="ShortDesk" class="footer-logo-img logo-light">
-        <span class="footer-brand">ShortDesk</span>
-      </div>
-      <p class="footer-tagline">Smart, trackable, password-protected short links. Open source and free forever.</p>
-    </div>
-    <div class="footer-col">
-      <h4 class="footer-col-title">Product</h4>
-      <a href="/">Home</a>
-      <a href="/#features">Features</a>
-      <a href="/dashboard">Dashboard</a>
-      <a href="/">Create Link</a>
-    </div>
-    <div class="footer-col">
-      <h4 class="footer-col-title">Resources</h4>
-      <a href="/docs">Documentation</a>
-      <a href="https://github.com/aminilay/shortdesk-official" target="_blank">GitHub</a>
-      <a href="https://github.com/aminilay/shortdesk-official/blob/main/LICENSE" target="_blank">License (MIT)</a>
-      <a href="https://github.com/aminilay/shortdesk-official/issues" target="_blank">Report Issue</a>
-    </div>
-    <div class="footer-col">
-      <h4 class="footer-col-title">Legal</h4>
-      <a href="/privacy">Privacy Policy</a>
-      <a href="/terms">Terms of Service</a>
-      <a href="https://github.com/aminilay" target="_blank">Contact</a>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <span>&copy; 2025 ShortDesk. Built by <a href="https://github.com/aminilay" target="_blank">Nilay</a></span>
-  </div>
-</footer>
+  <%- include('partials/footer') %>
 
   <!-- ============ SCRIPTS ============ -->
   <script>
@@ -688,5 +588,10 @@
       document.getElementById('themeIcon').innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
     }
   </script>
+  <!-- BACK TO TOP -->
+  <button class="back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+  </button>
+  <script src="/js/back-to-top.js" defer></script>
 </body>
 </html>
