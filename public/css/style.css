@@ -1609,14 +1609,35 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cur
    THEME TOGGLE
    ============================================================ */
 .theme-toggle {
-  background: var(--card-bg); border: 1px solid var(--border);
-  border-radius: 20px; width: 36px; height: 36px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 1rem;
-  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  background: var(--surface);
+  border: 1px solid var(--border-hover);
+  color: var(--text-primary);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
-.theme-toggle:hover { border-color: var(--accent); transform: scale(1.08); }
+.theme-toggle:hover {
+  background: var(--surface-hover);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.08);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.theme-toggle svg {
+  display: block;
+  pointer-events: none;
+  transition: transform 0.25s ease;
+}
+.theme-toggle:active svg {
+  transform: rotate(20deg);
+}
 
 /* ============================================================
    CONTAINER (password, expired)

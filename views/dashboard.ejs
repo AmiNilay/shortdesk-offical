@@ -37,7 +37,7 @@
         <input type="text" name="search" placeholder="Search by short ID..." value="<%= typeof searchId !== 'undefined' && searchId ? searchId : '' %>">
         <button type="submit" class="btn btn-primary btn-sm">Search</button>
       </form>
-      <a href="/app" class="btn btn-ghost btn-sm">+ New Link</a>
+      <a href="/app" class="btn btn-primary btn-sm">&larr; Back to Platform</a>
     </div>
   </section>
 
@@ -201,7 +201,7 @@
           <div class="empty-icon">&#128279;</div>
           <h3>No links yet</h3>
           <p>Create your first short link to see it here.</p>
-          <a href="/" class="btn btn-primary" style="margin-top:20px">Create a Link</a>
+          <a href="/app" class="btn btn-primary" style="margin-top:20px">&larr; Back to Platform</a>
         </div>
       <% } %>
 
@@ -211,24 +211,6 @@
   <!-- FOOTER -->
   <%- include('partials/footer') %>
 
-  <script>
-    (function() {
-      var saved = localStorage.getItem('shortdesk-theme');
-      if (saved) document.documentElement.setAttribute('data-theme', saved);
-      updateIcon();
-    })();
-    function toggleTheme() {
-      var current = document.documentElement.getAttribute('data-theme');
-      var next = current === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('shortdesk-theme', next);
-      updateIcon();
-    }
-    function updateIcon() {
-      var t = document.documentElement.getAttribute('data-theme');
-      document.getElementById('themeIcon').innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
-    }
-  </script>
   <script>
     var observer = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {

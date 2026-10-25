@@ -565,29 +565,6 @@
     })();
   </script>
 
-  <script>
-    // ============================================================
-    //  THEME TOGGLE
-    // ============================================================
-    (function() {
-      var saved = localStorage.getItem('shortdesk-theme');
-      if (saved) document.documentElement.setAttribute('data-theme', saved);
-      updateIcon();
-    })();
-
-    function toggleTheme() {
-      var current = document.documentElement.getAttribute('data-theme');
-      var next = current === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('shortdesk-theme', next);
-      updateIcon();
-    }
-
-    function updateIcon() {
-      var t = document.documentElement.getAttribute('data-theme');
-      document.getElementById('themeIcon').innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
-    }
-  </script>
   <!-- BACK TO TOP -->
   <button class="back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>

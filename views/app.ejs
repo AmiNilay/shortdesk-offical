@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Get Started Free — ShortDesk</title>
+  <title>Platform Studio — ShortDesk</title>
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -26,7 +26,7 @@
   <section class="page-header">
     <div class="page-header-inner">
       <div class="section-eyebrow">Platform</div>
-      <h1 class="page-title">Get Started Free</h1>
+      <h1 class="page-title">Platform Studio</h1>
       <p class="page-sub">Configure intelligent URLs with password encryption, expiration dates, custom slugs, and webhooks.</p>
     </div>
   </section>
@@ -170,29 +170,6 @@
       var target = document.getElementById('tab-' + name);
       if (target) target.classList.add('active');
       if (el) el.classList.add('active');
-    }
-  </script>
-
-  <script>
-    // Theme toggle
-    (function() {
-      var saved = localStorage.getItem('shortdesk-theme');
-      if (saved) document.documentElement.setAttribute('data-theme', saved);
-      updateIcon();
-    })();
-
-    function toggleTheme() {
-      var current = document.documentElement.getAttribute('data-theme');
-      var next = current === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('shortdesk-theme', next);
-      updateIcon();
-    }
-
-    function updateIcon() {
-      var t = document.documentElement.getAttribute('data-theme');
-      var icon = document.getElementById('themeIcon');
-      if (icon) icon.innerHTML = t === 'light' ? '&#9790;' : '&#9789;';
     }
   </script>
 
