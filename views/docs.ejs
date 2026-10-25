@@ -66,7 +66,7 @@
               <span class="docs-step-num">1</span>
               <div>
                 <h4>Go to the homepage</h4>
-                <p>Visit <code>/</code> or click <strong>Get Started</strong> in the navbar.</p>
+                <p>Visit <code>/</code> or open <strong>Platform</strong> in the navigation bar.</p>
               </div>
             </div>
             <div class="docs-step">
@@ -421,26 +421,35 @@ vercel
       observer.observe(el);
     });
 
-    // TOC active state on scroll
+    // TOC active state on scroll & click handling
     var tocLinks = document.querySelectorAll('.docs-toc-link');
     var sections = [];
     tocLinks.forEach(function(link) {
       var id = link.getAttribute('href').replace('#', '');
       var section = document.getElementById(id);
       if (section) sections.push({ el: section, link: link });
+
+      link.addEventListener('click', function() {
+        tocLinks.forEach(function(l) { l.classList.remove('active'); });
+        link.classList.add('active');
+      });
     });
 
     function updateToc() {
-      var scrollPos = window.scrollY + 120;
+      var scrollPos = window.scrollY + 160;
       var current = sections[0];
-      sections.forEach(function(s) {
-        if (s.el.offsetTop <= scrollPos) current = s;
-      });
-      tocLinks.forEach(function(l) { l.classList.remove('active'); });
-      if (current) current.link.classList.add('active');
+      for (var i = 0; i < sections.length; i++) {
+        if (sections[i].el.offsetTop <= scrollPos) {
+          current = sections[i];
+        }
+      }
+      if (current) {
+        tocLinks.forEach(function(l) { l.classList.remove('active'); });
+        current.link.classList.add('active');
+      }
     }
 
-    window.addEventListener('scroll', updateToc);
+    window.addEventListener('scroll', updateToc, { passive: true });
     updateToc();
   </script>
   <!-- BACK TO TOP -->

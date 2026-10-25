@@ -98,7 +98,7 @@ body {
   line-height: 1.75;
   font-size: 14px;
   transition: background 0.3s, color 0.3s;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
@@ -1869,56 +1869,80 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cur
   max-width: 1100px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 240px 1fr;
   gap: 48px;
-  align-items: start;
+  align-items: stretch;
 }
 
-/* SIDEBAR */
-.docs-sidebar { position: relative; }
+/* SIDEBAR — Fixed & Sticky scroll like Coinbase */
+.docs-sidebar {
+  position: relative;
+  align-self: stretch;
+  height: 100%;
+}
 
 .docs-sidebar-sticky {
+  position: -webkit-sticky;
   position: sticky;
-  top: calc(var(--nav-height) + 32px);
+  top: calc(var(--nav-height) + 24px);
+  max-height: calc(100vh - var(--nav-height) - 40px);
+  overflow-y: auto;
+  padding-right: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-hover) transparent;
+}
+
+.docs-sidebar-sticky::-webkit-scrollbar {
+  width: 4px;
+}
+.docs-sidebar-sticky::-webkit-scrollbar-track {
+  background: transparent;
+}
+.docs-sidebar-sticky::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 4px;
 }
 
 .docs-sidebar-title {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.75rem;
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-bottom: 14px;
+  padding-left: 12px;
   transition: color 0.3s;
 }
 
 .docs-toc {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .docs-toc-link {
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
-  padding: 6px 12px;
-  border-radius: 6px;
-  border-left: 2px solid transparent;
-  transition: color 0.2s, background 0.2s, border-color 0.2s;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+  transition: color 0.2s, background 0.2s, border-color 0.2s, transform 0.15s;
   text-decoration: none;
+  display: block;
 }
 
 .docs-toc-link:hover {
   color: var(--text-primary);
   background: var(--card-bg);
+  transform: translateX(2px);
 }
 
 .docs-toc-link.active {
   color: var(--accent);
   border-left-color: var(--accent);
   background: var(--accent-subtle);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 /* CONTENT BLOCKS */
