@@ -102,6 +102,26 @@ describe('ShortDesk', () => {
     expect([404, 500]).toContain(res.status);
   }, 20000);
 
+  // --- HEALTH CHECK ---
+  test('GET /health returns health status', async () => {
+    const res = await request(app).get('/health');
+    expect([200, 503]).toContain(res.status);
+    expect(res.body.timestamp).toBeDefined();
+    expect(res.headers['x-content-type-options']).toBe('nosniff');
+  });
+
+  // --- RESERVED ALIAS CHECK ---
+  test('POST /api/shorten with reserved alias returns 400', async () => {
+    const res = await request(app)
+      .post('/api/shorten')
+      .send({ url: 'https://example.com', customAlias: 'dashboard' })
+      .set('Content-Type', 'application/json');
+    expect([400, 500]).toContain(res.status);
+    if (res.status === 400) {
+      expect(res.body.error).toContain('reserved');
+    }
+  });
+
   // --- EMPTY BODY ---
   test('POST /shorten with empty body returns 400', async () => {
     const res = await request(app).post('/shorten').send('');

@@ -36,6 +36,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
+// --- Security Headers
+app.use(function (req, res, next) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
@@ -93,6 +102,10 @@ if (MONGO_URI) {
       console.error('MongoDB connection error:', err.message);
       if (process.env.NODE_ENV !== 'test') process.exit(1);
     });
+
+  mongoose.connection.on('connected', function () { dbReady = true; });
+  mongoose.connection.on('disconnected', function () { dbReady = false; });
+  mongoose.connection.on('reconnected', function () { dbReady = true; });
 }
 
 // --- Optional Redis
@@ -276,10 +289,14 @@ async function fireWebhook(doc, event) {
   }
 }
 
-// --- Click Queue (batch writes)
+// --- Click Queue (batch writes with bounded memory protection)
 var clickQueue = [];
+var MAX_CLICK_QUEUE_SIZE = 5000;
 
 function queueClick(data) {
+  if (clickQueue.length >= MAX_CLICK_QUEUE_SIZE) {
+    clickQueue.shift(); // Evict oldest event to guard against OOM during prolonged outages
+  }
   clickQueue.push(data);
   if (clickQueue.length >= 50) flushClickQueue();
 }
@@ -314,6 +331,97 @@ function getExpiryDate(option) {
 }
 
 var CUSTOM_ALIAS_REGEX = /^[a-zA-Z0-9_-]{3,30}$/;
+
+const RESERVED_ALIASES = new Set([
+  'app', 'dashboard', 'docs', 'privacy', 'terms', 'api', 'shorten',
+  'sw.js', 'robots.txt', 'health', 'favicon.ico', 'site.webmanifest',
+  'service-worker.js', 'assets', 'css', 'js'
+]);
+
+/**
+ * Reusable core service to validate and create a shortened URL record
+ */
+async function createShortLinkRecord(params) {
+  var url = params.url;
+  var customAlias = params.customAlias;
+  var password = params.password;
+  var expiry = params.expiry;
+  var webhookUrl = params.webhookUrl;
+  var clickThreshold = params.clickThreshold;
+  var ip = params.ip;
+
+  if (!url || !isValidHttpUrl(url)) {
+    return { error: 'Please enter a valid URL starting with http:// or https://', statusCode: 400 };
+  }
+
+  if (customAlias && customAlias.trim()) {
+    var alias = customAlias.trim();
+    if (!CUSTOM_ALIAS_REGEX.test(alias)) {
+      return { error: 'Custom alias must be 3-30 characters: letters, numbers, _ or - only.', statusCode: 400 };
+    }
+    if (RESERVED_ALIASES.has(alias.toLowerCase())) {
+      return { error: 'That custom alias is reserved for system routes.', statusCode: 400 };
+    }
+    var exists = await Url.findOne({ shortId: alias }).lean();
+    if (exists) {
+      return { error: 'That custom alias is already taken.', statusCode: 409 };
+    }
+  }
+
+  if (webhookUrl && webhookUrl.trim() && !isValidHttpUrl(webhookUrl.trim())) {
+    return { error: 'Webhook URL must be a valid http:// or https:// URL.', statusCode: 400 };
+  }
+
+  // Check DB readiness after basic validation
+  if (!dbReady) {
+    return { error: 'Database unavailable. Please try again later.', statusCode: 500 };
+  }
+
+  var safety = await checkSafeBrowsing(url);
+  if (!safety.safe) {
+    return { error: 'This URL has been flagged as potentially malicious (' + safety.threat + '). Cannot shorten.', statusCode: 400 };
+  }
+
+  var shortId;
+  if (customAlias && customAlias.trim()) {
+    shortId = customAlias.trim();
+  } else {
+    var codeResult = await generateShortCode();
+    shortId = codeResult.code;
+  }
+
+  var docData = {
+    originalUrl: url.trim(),
+    shortId: shortId,
+    shortCode: 0,
+    createdByIp: hashIp(ip)
+  };
+
+  if (password && password.trim().length > 0) {
+    docData.passwordHash = await bcrypt.hash(password.trim(), 10);
+  }
+  if (expiry && expiry !== 'never') {
+    docData.expiresAt = getExpiryDate(expiry);
+  }
+  if (webhookUrl && webhookUrl.trim()) {
+    docData.webhookUrl = webhookUrl.trim();
+  }
+  if (clickThreshold && parseInt(clickThreshold, 10) > 0) {
+    docData.clickThreshold = parseInt(clickThreshold, 10);
+  }
+
+  var doc = await Url.create(docData);
+
+  if (redis) {
+    await redis.setex('url:' + doc.shortId, 3600, JSON.stringify({
+      originalUrl: doc.originalUrl,
+      passwordHash: doc.passwordHash || null,
+      expiresAt: doc.expiresAt ? doc.expiresAt.toISOString() : null
+    })).catch(function () {});
+  }
+
+  return { doc: doc };
+}
 
 // ============================================================
 //  RATE LIMITERS
@@ -363,6 +471,16 @@ app.get('/app', function (req, res) {
   res.render('app', { error: null, success: null });
 });
 
+// ---- 1.2 HEALTH CHECK ENDPOINT ----
+app.get('/health', function (req, res) {
+  res.status(dbReady ? 200 : 503).json({
+    status: dbReady ? 'healthy' : 'degraded',
+    database: dbReady ? 'connected' : 'disconnected',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString()
+  });
+});
+
 // ---- 2. STATIC PAGES (MUST be before /:shortId catch-all) ----
 app.get('/privacy', function (req, res) {
   res.render('privacy');
@@ -379,94 +497,26 @@ app.get('/docs', function (req, res) {
 // ---- 3. CREATE SHORT LINK (FORM POST) ----
 app.post('/shorten', shortenLimiter, async function (req, res) {
   try {
-    var originalUrl = req.body.originalUrl;
-    var customAlias = req.body.customAlias;
-    var password = req.body.password;
-    var expiry = req.body.expiry;
-    var webhookUrl = req.body.webhookUrl;
-    var clickThreshold = req.body.clickThreshold;
+    var result = await createShortLinkRecord({
+      url: req.body.originalUrl,
+      customAlias: req.body.customAlias,
+      password: req.body.password,
+      expiry: req.body.expiry,
+      webhookUrl: req.body.webhookUrl,
+      clickThreshold: req.body.clickThreshold,
+      ip: req.ip
+    });
 
-    // --- Step 1: Validate input (no DB needed) ---
-    if (!originalUrl || !isValidHttpUrl(originalUrl)) {
-      return res.status(400).render('app', {
-        error: 'Please enter a valid URL starting with http:// or https://',
+    if (result.error) {
+      return res.status(result.statusCode || 400).render('app', {
+        error: result.error,
         success: null
       });
     }
 
-    if (customAlias && customAlias.trim() && !CUSTOM_ALIAS_REGEX.test(customAlias)) {
-      return res.status(400).render('app', {
-        error: 'Custom alias must be 3-30 characters: letters, numbers, _ or - only.',
-        success: null
-      });
-    }
-
-    // --- Step 2: Check DB availability ---
-    if (!dbReady) {
-      return res.status(500).render('app', {
-        error: 'Database unavailable. Please try again later.',
-        success: null
-      });
-    }
-
-    // --- Step 3: Safe Browsing check ---
-    var safety = await checkSafeBrowsing(originalUrl);
-    if (!safety.safe) {
-      return res.status(400).render('app', {
-        error: 'This URL has been flagged as potentially malicious (' + safety.threat + '). Cannot shorten.',
-        success: null
-      });
-    }
-
-    // --- Step 4: Generate or validate short ID ---
-    var shortId;
-    if (customAlias && customAlias.trim()) {
-      var exists = await Url.findOne({ shortId: customAlias.trim() }).lean();
-      if (exists) {
-        return res.status(409).render('app', {
-          error: 'That custom alias is already taken.',
-          success: null
-        });
-      }
-      shortId = customAlias.trim();
-    } else {
-      var result = await generateShortCode();
-      shortId = result.code;
-    }
-
-    // --- Step 5: Build document ---
-    var docData = {
-      originalUrl: originalUrl,
-      shortId: shortId,
-      shortCode: 0,
-      createdByIp: hashIp(req.ip)
-    };
-
-    if (password && password.trim().length > 0) {
-      docData.passwordHash = await bcrypt.hash(password.trim(), 10);
-    }
-    if (expiry && expiry !== 'never') {
-      docData.expiresAt = getExpiryDate(expiry);
-    }
-    if (webhookUrl && webhookUrl.trim()) {
-      docData.webhookUrl = webhookUrl.trim();
-    }
-    if (clickThreshold && parseInt(clickThreshold) > 0) {
-      docData.clickThreshold = parseInt(clickThreshold);
-    }
-
-    // --- Step 6: Save and render result ---
-    var doc = await Url.create(docData);
+    var doc = result.doc;
     var shortUrl = getBaseUrl(req) + '/' + doc.shortId;
     var qrDataUrl = await QRCode.toDataURL(shortUrl);
-
-    if (redis) {
-      await redis.setex('url:' + doc.shortId, 3600, JSON.stringify({
-        originalUrl: doc.originalUrl,
-        passwordHash: doc.passwordHash || null,
-        expiresAt: doc.expiresAt ? doc.expiresAt.toISOString() : null
-      }));
-    }
 
     res.render('result', {
       link: {
@@ -493,7 +543,7 @@ app.post('/shorten', shortenLimiter, async function (req, res) {
       clickThreshold: doc.clickThreshold
     });
   } catch (err) {
-    console.error(err);
+    console.error('Shorten error:', err);
     res.status(500).render('app', {
       error: 'Something went wrong. Please try again.',
       success: null
@@ -520,28 +570,32 @@ app.post('/shorten/bulk', shortenLimiter, async function (req, res) {
       });
     }
 
-    var urlList = urls.split('\n').map(function (u) { return u.trim(); }).filter(function (u) { return u.length > 0; });
+    var urlList = urls.split('\n')
+      .map(function (u) { return u.trim(); })
+      .filter(function (u) { return u.length > 0; })
+      .slice(0, 50);
+
     var results = [];
     var errors = [];
 
     for (var i = 0; i < urlList.length; i++) {
       var url = urlList[i];
-      if (!isValidHttpUrl(url)) {
-        errors.push('Invalid: ' + url);
-        continue;
-      }
-      var safety = await checkSafeBrowsing(url);
-      if (!safety.safe) {
-        errors.push('Malicious (' + safety.threat + '): ' + url);
-        continue;
-      }
-      var codeResult = await generateShortCode();
-      var doc = await Url.create({
-        originalUrl: url,
-        shortId: codeResult.code,
-        shortCode: 0,
-        createdByIp: hashIp(req.ip)
+      var itemResult = await createShortLinkRecord({
+        url: url,
+        customAlias: null,
+        password: null,
+        expiry: 'never',
+        webhookUrl: null,
+        clickThreshold: 0,
+        ip: req.ip
       });
+
+      if (itemResult.error) {
+        errors.push(url + ': ' + itemResult.error);
+        continue;
+      }
+
+      var doc = itemResult.doc;
       results.push({
         originalUrl: url,
         shortUrl: getBaseUrl(req) + '/' + doc.shortId,
@@ -559,7 +613,7 @@ app.post('/shorten/bulk', shortenLimiter, async function (req, res) {
       success: null
     });
   } catch (err) {
-    console.error(err);
+    console.error('Bulk shorten error:', err);
     res.status(500).render('app', {
       error: 'Bulk shortening failed.',
       success: null
@@ -651,11 +705,18 @@ app.get('/analytics/:shortId', async function (req, res) {
     var dateFilter = { shortId: shortId };
     if (from || to) {
       dateFilter.timestamp = {};
-      if (from) dateFilter.timestamp.$gte = new Date(from);
+      if (from) {
+        var startDate = new Date(from);
+        if (!isNaN(startDate.getTime())) {
+          dateFilter.timestamp.$gte = startDate;
+        }
+      }
       if (to) {
         var endDate = new Date(to);
-        endDate.setHours(23, 59, 59, 999);
-        dateFilter.timestamp.$lte = endDate;
+        if (!isNaN(endDate.getTime())) {
+          endDate.setHours(23, 59, 59, 999);
+          dateFilter.timestamp.$lte = endDate;
+        }
       }
     }
 
@@ -893,58 +954,21 @@ app.get('/:shortId', redirectLimiter, async function (req, res) {
 // ---- API: Create Short Link ----
 app.post('/api/shorten', apiLimiter, async function (req, res) {
   try {
-    var url = req.body.url;
-    var customAlias = req.body.customAlias;
-    var password = req.body.password;
-    var expiry = req.body.expiry;
-    var webhookUrl = req.body.webhookUrl;
-    var clickThreshold = req.body.clickThreshold;
+    var result = await createShortLinkRecord({
+      url: req.body.url,
+      customAlias: req.body.customAlias,
+      password: req.body.password,
+      expiry: req.body.expiry,
+      webhookUrl: req.body.webhookUrl,
+      clickThreshold: req.body.clickThreshold,
+      ip: req.ip
+    });
 
-    // --- Step 1: Validate input (no DB needed) ---
-    if (!url || !isValidHttpUrl(url)) {
-      return res.status(400).json({ error: 'Invalid URL.' });
+    if (result.error) {
+      return res.status(result.statusCode || 400).json({ error: result.error });
     }
 
-    if (customAlias && !CUSTOM_ALIAS_REGEX.test(customAlias)) {
-      return res.status(400).json({ error: 'Invalid custom alias.' });
-    }
-
-    // --- Step 2: Check DB availability ---
-    if (!dbReady) {
-      return res.status(500).json({ error: 'Database not available' });
-    }
-
-    // --- Step 3: Safe Browsing check ---
-    var safety = await checkSafeBrowsing(url);
-    if (!safety.safe) {
-      return res.status(400).json({ error: 'URL flagged as malicious: ' + safety.threat });
-    }
-
-    // --- Step 4: Generate or validate short ID ---
-    var shortId;
-    if (customAlias) {
-      var exists = await Url.findOne({ shortId: customAlias }).lean();
-      if (exists) return res.status(409).json({ error: 'Alias already taken.' });
-      shortId = customAlias;
-    } else {
-      var codeResult = await generateShortCode();
-      shortId = codeResult.code;
-    }
-
-    // --- Step 5: Build and save document ---
-    var docData = {
-      originalUrl: url,
-      shortId: shortId,
-      shortCode: 0,
-      createdByIp: hashIp(req.ip)
-    };
-    if (password) docData.passwordHash = await bcrypt.hash(password, 10);
-    if (expiry && expiry !== 'never') docData.expiresAt = getExpiryDate(expiry);
-    if (webhookUrl) docData.webhookUrl = webhookUrl;
-    if (clickThreshold && parseInt(clickThreshold) > 0) docData.clickThreshold = parseInt(clickThreshold);
-
-    var doc = await Url.create(docData);
-
+    var doc = result.doc;
     res.json({
       shortUrl: getBaseUrl(req) + '/' + doc.shortId,
       shortId: doc.shortId,
@@ -955,7 +979,7 @@ app.post('/api/shorten', apiLimiter, async function (req, res) {
       clickThreshold: doc.clickThreshold
     });
   } catch (err) {
-    console.error(err);
+    console.error('API Shorten error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -979,22 +1003,22 @@ app.post('/api/shorten/bulk', apiLimiter, async function (req, res) {
     var errors = [];
     for (var i = 0; i < urls.length; i++) {
       var url = urls[i];
-      if (!isValidHttpUrl(url)) {
-        errors.push({ url: url, error: 'Invalid URL' });
-        continue;
-      }
-      var safety = await checkSafeBrowsing(url);
-      if (!safety.safe) {
-        errors.push({ url: url, error: 'Malicious: ' + safety.threat });
-        continue;
-      }
-      var codeResult = await generateShortCode();
-      var doc = await Url.create({
-        originalUrl: url,
-        shortId: codeResult.code,
-        shortCode: 0,
-        createdByIp: hashIp(req.ip)
+      var itemResult = await createShortLinkRecord({
+        url: url,
+        customAlias: null,
+        password: null,
+        expiry: 'never',
+        webhookUrl: null,
+        clickThreshold: 0,
+        ip: req.ip
       });
+
+      if (itemResult.error) {
+        errors.push({ url: url, error: itemResult.error });
+        continue;
+      }
+
+      var doc = itemResult.doc;
       results.push({
         originalUrl: url,
         shortUrl: getBaseUrl(req) + '/' + doc.shortId,
@@ -1004,7 +1028,7 @@ app.post('/api/shorten/bulk', apiLimiter, async function (req, res) {
 
     res.json({ results: results, errors: errors, total: results.length });
   } catch (err) {
-    console.error(err);
+    console.error('API Bulk Shorten error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
