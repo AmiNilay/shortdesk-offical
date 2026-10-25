@@ -102,8 +102,15 @@
                             <span class="badge badge-expiry">&#9200; <%= new Date(link.expiresAt).toLocaleDateString() %></span>
                           <% } %>
                         <% } %>
+                        <% if (link.maxClicks) { %>
+                          <% if (link.totalClicks >= link.maxClicks) { %>
+                            <span class="badge badge-expired">&#9889; Limit Reached</span>
+                          <% } else { %>
+                            <span class="badge badge-limit">&#9889; <%= link.maxClicks %> max</span>
+                          <% } %>
+                        <% } %>
                       </td>
-                      <td class="clicks-cell"><%= link.totalClicks %></td>
+                      <td class="clicks-cell"><%= link.totalClicks %><% if (link.maxClicks) { %> <span style="font-size:0.75rem;color:var(--text-muted)">/ <%= link.maxClicks %></span><% } %></td>
                       <td><%= new Date(link.createdAt).toLocaleDateString() %></td>
                       <td class="actions">
                         <a href="/analytics/<%= link.shortId %>" class="btn btn-accent-outline btn-sm">Analytics</a>
@@ -182,8 +189,15 @@
                             <span class="badge badge-expiry">&#9200; <%= new Date(link.expiresAt).toLocaleDateString() %></span>
                           <% } %>
                         <% } %>
+                        <% if (link.maxClicks) { %>
+                          <% if (link.totalClicks >= link.maxClicks) { %>
+                            <span class="badge badge-expired">&#9889; Limit Reached</span>
+                          <% } else { %>
+                            <span class="badge badge-limit">&#9889; <%= link.maxClicks %> max</span>
+                          <% } %>
+                        <% } %>
                       </td>
-                      <td class="clicks-cell"><%= link.totalClicks %></td>
+                      <td class="clicks-cell"><%= link.totalClicks %><% if (link.maxClicks) { %> <span style="font-size:0.75rem;color:var(--text-muted)">/ <%= link.maxClicks %></span><% } %></td>
                       <td><%= new Date(link.createdAt).toLocaleDateString() %></td>
                       <td class="actions">
                         <a href="/analytics/<%= link.shortId %>" class="btn btn-accent-outline btn-sm">Analytics</a>

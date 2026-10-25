@@ -60,6 +60,9 @@
           <% if (link.expiresAt) { %>
             <div class="meta-item">&#9200; Expires: <span><%= new Date(link.expiresAt).toLocaleDateString() %></span></div>
           <% } %>
+          <% if (link.maxClicks) { %>
+            <div class="meta-item">&#9889; Limit: <span><%= link.maxClicks %> clicks</span></div>
+          <% } %>
           <% if (link.webhookUrl) { %>
             <div class="meta-item">&#128276; <span>Webhook active</span></div>
           <% } %>

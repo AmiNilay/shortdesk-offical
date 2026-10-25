@@ -163,6 +163,13 @@ Result:      https://your-domain.com/my-portfolio</code></pre>
             </table>
           </div>
           <p>Expired links show a friendly expiration page instead of redirecting.</p>
+
+          <h3 style="margin-top:24px">Click Limit Expiration</h3>
+          <p>
+            In addition to time-based expiration, you can set a <code>maxClicks</code> limit.
+            Once the link reaches this threshold (e.g. 100 clicks), it immediately deactivates and
+            returns a 410 Gone status. If configured, a <code>max_clicks_reached</code> webhook event is fired.
+          </p>
         </div>
 
         <!-- WEBHOOKS -->
@@ -231,6 +238,7 @@ Result:      https://your-domain.com/my-portfolio</code></pre>
     "customAlias": "my-link",
     "password": "optional-password",
     "expiry": "7d",
+    "maxClicks": 100,
     "webhookUrl": "https://your-webhook.com/notify",
     "clickThreshold": 100
   }'</code></pre>

@@ -60,7 +60,7 @@
               </div>
             </div>
 
-            <div class="form-row-3" style="margin-bottom:20px">
+            <div class="form-row-4" style="margin-bottom:20px">
               <div class="form-group">
                 <label for="customAlias" class="field-label">Custom Alias (Optional)</label>
                 <input id="customAlias" name="customAlias" type="text"
@@ -70,7 +70,7 @@
               </div>
 
               <div class="form-group">
-                <label for="expiry" class="field-label">Link Expiration</label>
+                <label for="expiry" class="field-label">Time Expiration</label>
                 <select id="expiry" name="expiry">
                   <option value="never">Never (Permanent)</option>
                   <option value="1h">1 Hour</option>
@@ -79,6 +79,13 @@
                   <option value="30d">30 Days</option>
                 </select>
                 <p class="field-hint">Automatic 410 Gone after expiry</p>
+              </div>
+
+              <div class="form-group">
+                <label for="maxClicks" class="field-label">Click Limit (Optional)</label>
+                <input id="maxClicks" name="maxClicks" type="number" min="1" step="1"
+                       placeholder="e.g. 100">
+                <p class="field-hint">Auto-expires after N clicks</p>
               </div>
 
               <div class="form-group">

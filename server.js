@@ -130,6 +130,7 @@ const urlSchema = new mongoose.Schema({
   shortId:           { type: String, required: true, unique: true, index: true },
   shortCode:         { type: Number, required: true },
   totalClicks:       { type: Number, default: 0 },
+  maxClicks:         { type: Number, default: null },
   passwordHash:      { type: String, default: null },
   expiresAt:         { type: Date, default: null },
   createdAt:         { type: Date, default: Date.now },
@@ -137,6 +138,7 @@ const urlSchema = new mongoose.Schema({
   webhookUrl:        { type: String, default: null },
   clickThreshold:    { type: Number, default: 0 },
   thresholdNotified: { type: Boolean, default: false },
+  maxClicksNotified: { type: Boolean, default: false },
   expiryNotified:    { type: Boolean, default: false }
 });
 urlSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
@@ -278,6 +280,7 @@ async function fireWebhook(doc, event) {
       timestamp: new Date().toISOString()
     };
     if (event === 'click_threshold_reached') payload.threshold = doc.clickThreshold;
+    if (event === 'max_clicks_reached') payload.maxClicks = doc.maxClicks;
     if (event === 'link_expired') payload.expiredAt = doc.expiresAt;
     await fetch(doc.webhookUrl, {
       method: 'POST',
@@ -346,6 +349,7 @@ async function createShortLinkRecord(params) {
   var customAlias = params.customAlias;
   var password = params.password;
   var expiry = params.expiry;
+  var maxClicks = params.maxClicks;
   var webhookUrl = params.webhookUrl;
   var clickThreshold = params.clickThreshold;
   var ip = params.ip;
@@ -370,6 +374,13 @@ async function createShortLinkRecord(params) {
 
   if (webhookUrl && webhookUrl.trim() && !isValidHttpUrl(webhookUrl.trim())) {
     return { error: 'Webhook URL must be a valid http:// or https:// URL.', statusCode: 400 };
+  }
+
+  if (maxClicks !== undefined && maxClicks !== null && String(maxClicks).trim() !== '') {
+    var parsedMaxClicks = parseInt(maxClicks, 10);
+    if (isNaN(parsedMaxClicks) || parsedMaxClicks < 1) {
+      return { error: 'Click limit must be a positive integer (minimum 1).', statusCode: 400 };
+    }
   }
 
   // Check DB readiness after basic validation
@@ -402,6 +413,9 @@ async function createShortLinkRecord(params) {
   }
   if (expiry && expiry !== 'never') {
     docData.expiresAt = getExpiryDate(expiry);
+  }
+  if (maxClicks !== undefined && maxClicks !== null && String(maxClicks).trim() !== '') {
+    docData.maxClicks = parseInt(maxClicks, 10);
   }
   if (webhookUrl && webhookUrl.trim()) {
     docData.webhookUrl = webhookUrl.trim();
@@ -502,6 +516,7 @@ app.post('/shorten', shortenLimiter, async function (req, res) {
       customAlias: req.body.customAlias,
       password: req.body.password,
       expiry: req.body.expiry,
+      maxClicks: req.body.maxClicks,
       webhookUrl: req.body.webhookUrl,
       clickThreshold: req.body.clickThreshold,
       ip: req.ip
@@ -524,6 +539,7 @@ app.post('/shorten', shortenLimiter, async function (req, res) {
         originalUrl: doc.originalUrl,
         shortUrl: shortUrl,
         totalClicks: 0,
+        maxClicks: doc.maxClicks || null,
         createdAt: doc.createdAt,
         hasPassword: !!doc.passwordHash,
         expiresAt: doc.expiresAt,
@@ -535,6 +551,7 @@ app.post('/shorten', shortenLimiter, async function (req, res) {
       qrUrl: qrDataUrl,
       qrDataUrl: qrDataUrl,
       clicks: 0,
+      maxClicks: doc.maxClicks || null,
       createdAt: doc.createdAt,
       shortId: doc.shortId,
       hasPassword: !!doc.passwordHash,
@@ -639,6 +656,7 @@ app.get('/dashboard', async function (req, res) {
             shortUrl: getBaseUrl(req) + '/' + doc.shortId,
             shortId: doc.shortId,
             totalClicks: doc.totalClicks,
+            maxClicks: doc.maxClicks || null,
             createdAt: doc.createdAt,
             hasPassword: !!doc.passwordHash,
             expiresAt: doc.expiresAt,
@@ -663,6 +681,7 @@ app.get('/dashboard', async function (req, res) {
           shortUrl: getBaseUrl(req) + '/' + d.shortId,
           shortId: d.shortId,
           totalClicks: d.totalClicks,
+          maxClicks: d.maxClicks || null,
           createdAt: d.createdAt,
           hasPassword: !!d.passwordHash,
           expiresAt: d.expiresAt,
@@ -756,6 +775,7 @@ app.get('/analytics/:shortId', async function (req, res) {
         originalUrl: doc.originalUrl,
         shortUrl: baseUrl + '/' + doc.shortId,
         totalClicks: doc.totalClicks,
+        maxClicks: doc.maxClicks || null,
         createdAt: doc.createdAt,
         hasPassword: !!doc.passwordHash,
         expiresAt: doc.expiresAt,
@@ -903,6 +923,19 @@ app.get('/:shortId', redirectLimiter, async function (req, res) {
       return res.status(410).render('expired', { message: 'This link has expired.' });
     }
 
+    // Check click limit expiration
+    if (doc.maxClicks && doc.totalClicks >= doc.maxClicks) {
+      if (doc.webhookUrl && !doc.maxClicksNotified) {
+        fireWebhook(doc, 'max_clicks_reached');
+        Url.updateOne({ shortId: shortId }, { maxClicksNotified: true }).catch(function () {});
+      }
+      return res.status(410).render('expired', {
+        message: 'This link has reached its maximum click limit of ' + doc.maxClicks + ' clicks.',
+        limitReached: true,
+        maxClicks: doc.maxClicks
+      });
+    }
+
     // Check password
     if (doc.passwordHash) {
       var authCookie = req.cookies && req.cookies['auth_' + shortId];
@@ -920,10 +953,19 @@ app.get('/:shortId', redirectLimiter, async function (req, res) {
       { $inc: { totalClicks: 1 } },
       { new: true }
     ).lean().then(function (updated) {
-      if (updated && updated.webhookUrl && updated.clickThreshold > 0 &&
+      if (!updated) return;
+      if (updated.webhookUrl && updated.clickThreshold > 0 &&
           !updated.thresholdNotified && updated.totalClicks >= updated.clickThreshold) {
         fireWebhook(updated, 'click_threshold_reached');
         Url.updateOne({ shortId: shortId }, { thresholdNotified: true }).catch(function () {});
+      }
+      if (updated.webhookUrl && updated.maxClicks &&
+          !updated.maxClicksNotified && updated.totalClicks >= updated.maxClicks) {
+        fireWebhook(updated, 'max_clicks_reached');
+        Url.updateOne({ shortId: shortId }, { maxClicksNotified: true }).catch(function () {});
+      }
+      if (redis && updated.maxClicks && updated.totalClicks >= updated.maxClicks) {
+        redis.del('url:' + shortId).catch(function () {});
       }
     }).catch(function () {});
 
@@ -959,6 +1001,7 @@ app.post('/api/shorten', apiLimiter, async function (req, res) {
       customAlias: req.body.customAlias,
       password: req.body.password,
       expiry: req.body.expiry,
+      maxClicks: req.body.maxClicks,
       webhookUrl: req.body.webhookUrl,
       clickThreshold: req.body.clickThreshold,
       ip: req.ip
@@ -975,6 +1018,7 @@ app.post('/api/shorten', apiLimiter, async function (req, res) {
       originalUrl: doc.originalUrl,
       hasPassword: !!doc.passwordHash,
       expiresAt: doc.expiresAt,
+      maxClicks: doc.maxClicks || null,
       webhookUrl: doc.webhookUrl || null,
       clickThreshold: doc.clickThreshold
     });
@@ -1051,6 +1095,7 @@ app.get('/api/analytics/:shortId', apiLimiter, async function (req, res) {
       shortId: doc.shortId,
       originalUrl: doc.originalUrl,
       totalClicks: doc.totalClicks,
+      maxClicks: doc.maxClicks || null,
       createdAt: doc.createdAt,
       expiresAt: doc.expiresAt,
       webhookUrl: doc.webhookUrl || null,

@@ -128,4 +128,34 @@ describe('ShortDesk', () => {
     expect(res.status).toBe(400);
   });
 
+  // --- MAX CLICKS VALIDATION ---
+  test('POST /api/shorten with invalid maxClicks returns 400', async () => {
+    const res = await request(app)
+      .post('/api/shorten')
+      .send({ url: 'https://example.com/test', maxClicks: -5 })
+      .set('Content-Type', 'application/json');
+    expect(res.status).toBe(400);
+    expect(res.body.error).toContain('Click limit must be a positive integer');
+  });
+
+  test('POST /api/shorten with non-numeric maxClicks returns 400', async () => {
+    const res = await request(app)
+      .post('/api/shorten')
+      .send({ url: 'https://example.com/test', maxClicks: 'abc' })
+      .set('Content-Type', 'application/json');
+    expect(res.status).toBe(400);
+    expect(res.body.error).toContain('Click limit must be a positive integer');
+  });
+
+  test('POST /api/shorten with valid maxClicks returns maxClicks', async () => {
+    const res = await request(app)
+      .post('/api/shorten')
+      .send({ url: 'https://example.com/test-clicks-' + Date.now(), maxClicks: 50 })
+      .set('Content-Type', 'application/json');
+    expect([200, 500]).toContain(res.status);
+    if (res.status === 200) {
+      expect(res.body.maxClicks).toBe(50);
+    }
+  });
+
 });

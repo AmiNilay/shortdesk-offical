@@ -34,6 +34,7 @@
         Created <%= new Date(link.createdAt).toLocaleDateString() %>
         <% if (link.hasPassword) { %> &middot; &#128274; Protected<% } %>
         <% if (link.expiresAt) { %> &middot; &#9200; Expires <%= new Date(link.expiresAt).toLocaleDateString() %><% } %>
+        <% if (link.maxClicks) { %> &middot; &#9889; Limit <%= link.totalClicks %>/<%= link.maxClicks %> clicks<% } %>
       </p>
     </div>
   </section>
@@ -65,6 +66,12 @@
             <div class="analytics-stat-value"><%= Object.keys(referrerBreakdown).length %></div>
             <div class="analytics-stat-label">Referrers</div>
           </div>
+          <% if (link.maxClicks) { %>
+            <div class="analytics-stat-card reveal-scroll" style="--reveal-delay:0.25s">
+              <div class="analytics-stat-value"><%= Math.max(0, link.maxClicks - link.totalClicks) %></div>
+              <div class="analytics-stat-label">Clicks Remaining (<%= link.totalClicks %>/<%= link.maxClicks %>)</div>
+            </div>
+          <% } %>
         </div>
       </div>
 

@@ -37,10 +37,10 @@
       <div class="dash-card reveal-scroll" style="text-align:center; padding:60px 40px;">
         <div class="expired-icon" style="font-size:4rem; margin-bottom:20px;">&#128683;</div>
         <h2 style="font-family:var(--font-display); font-weight:700; font-size:1.4rem; color:var(--text-primary); margin-bottom:12px; transition:color 0.3s;">
-          This link is no longer available
+          <%= typeof limitReached !== 'undefined' && limitReached ? 'Click Limit Reached' : 'This link is no longer available' %>
         </h2>
         <p class="expired-message" style="color:var(--text-muted); font-size:0.95rem; line-height:1.75; max-width:400px; margin:0 auto 28px; transition:color 0.3s;">
-          The link may have expired, been removed, or never existed. Try creating a new short link.
+          <%= typeof message !== 'undefined' ? message : 'The link may have expired, been removed, or never existed. Try creating a new short link.' %>
         </p>
         <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
           <a href="/" class="btn btn-primary btn-lg">Create New Link</a>
