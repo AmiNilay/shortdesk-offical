@@ -17,3 +17,9 @@ build/
 # System files
 .DS_Store
 Thumbs.db
+
+# Project agent, proposal, and container configurations
+AGENTS.md
+Dockerfile
+GEMINI.md
+PROPOSAL.md
